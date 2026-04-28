@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Heart, Activity, Smile, Clock } from 'lucide-react'
-
+import { Route as panelRoute } from './panel/index.tsx'
 import Nav from '../components/landing/Nav'
 import Hero from '../components/landing/Hero'
 import SensorCard from '../components/landing/SensorCard'
@@ -44,6 +44,7 @@ const sensors = [
 
 function LandingPage() {
   const [loginOpen, setLoginOpen] = useState(false)
+  const router = useRouter()
 
   return (
     <div className="landing">
@@ -342,7 +343,7 @@ function LandingPage() {
 
         <button
           className="pl-reveal pl-reveal-d3"
-          onClick={() => setLoginOpen(true)}
+          onClick={() => router.navigate(panelRoute)}
           style={{
             background: '#00BFA5',
             color: '#0A1628',

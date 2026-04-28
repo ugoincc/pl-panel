@@ -347,6 +347,30 @@ a {
 }
 
 /* ═══════════════════════════════════════════════════
+   PulseLab Shared Dark Theme
+   ═══════════════════════════════════════════════════ */
+
+.pl-dark {
+  --pl-navy:       #0A1628;
+  --pl-navy-light: #152238;
+  --pl-navy-mid:   #1E3048;
+  --pl-teal:       #00BFA5;
+  --pl-teal-dim:   rgba(0, 191, 165, 0.12);
+  --pl-teal-glow:  rgba(0, 191, 165, 0.35);
+  --pl-text:       #F0F4F8;
+  --pl-text-sec:   #8A9BB0;
+
+  background: var(--pl-navy);
+  color: var(--pl-text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════
    PulseLab Landing Page
    ═══════════════════════════════════════════════════ */
 
@@ -485,3 +509,11 @@ a {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   Admin Panel
+   ═══════════════════════════════════════════════════ */
+
+@keyframes admin-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.admin-dot-online  { animation: admin-blink 2s ease infinite; }
+.admin-dot-syncing { animation: admin-blink 0.8s ease infinite; }

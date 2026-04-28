@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PulseLab — Painel Administrativo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0A1628;
+  --navy-light:  #152238;
+  --navy-mid:    #1E3048;
+  --navy-hover:  #1a2d47;
+  --teal:        #00BFA5;
+  --teal-dim:    rgba(0,191,165,0.10);
+  --teal-glow:   rgba(0,191,165,0.30);
+  --text-pri:    #F0F4F8;
+  --text-sec:    #8A9BB0;
+  --divider:     #1E3048;
+  --red:         #E05C5C;
+  --amber:       #D4A017;
+  --green:       #00BFA5;
+  --font-d:      'DM Serif Display', Georgia, serif;
+  --font-b:      'Space Grotesk', sans-serif;
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: var(--navy);
+  color: var(--text-pri);
+  font-family: var(--font-b);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout shell ───────────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 48px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Topbar ─────────────────────────────────── */
+.topbar {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  background: var(--navy-light);
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  z-index: 10;
+}
+.topbar-logo {
+  font-family: var(--font-d);
+  font-size: 1rem;
+  color: var(--text-pri);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.pulse-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal-glow);
+  flex-shrink: 0;
+  animation: hb 1.4s ease-in-out infinite;
+}
+@keyframes hb {
+  0%,100% { transform: scale(1);   opacity: 1; }
+  50%      { transform: scale(1.6); opacity: 0.6; }
+}
+.topbar-sep { width: 1px; height: 20px; background: var(--divider); }
+.topbar-breadcrumb {
+  font-size: 0.72rem;
+  color: var(--text-sec);
+  letter-spacing: 0.06em;
+}
+.topbar-breadcrumb span { color: var(--teal); }
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar-tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-sec);
+  border: 1px solid var(--divider);
+  padding: 3px 8px;
+}
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: background 0.15s;
+}
+.topbar-user:hover { background: var(--navy-mid); }
+.avatar {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--navy-mid);
+  border: 1px solid var(--teal);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--teal);
+}
+.topbar-username { font-size: 0.75rem; color: var(--text-sec); }
+
+/* ── Sidebar ─────────────────────────────────── */
+.sidebar {
+  grid-column: 1;
+  grid-row: 2;
+  background: var(--navy-light);
+  border-right: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+.nav-group-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-sec);
+  padding: 12px 18px 6px;
+  opacity: 0.7;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  cursor: pointer;
+  color: var(--text-sec);
+  font-size: 0.8rem;
+  font-weight: 400;
+  transition: background 0.15s, color 0.15s;
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+.nav-item:hover { background: var(--navy-hover); color: var(--text-pri); }
+.nav-item.active {
+  color: var(--teal);
+  border-left-color: var(--teal);
+  background: var(--teal-dim);
+  font-weight: 500;
+}
+.nav-item svg { flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--teal-dim);
+  color: var(--teal);
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 9px;
+}
+.nav-sep { height: 1px; background: var(--divider); margin: 8px 0; }
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--divider);
+}
+
+/* ── Main ───────────────────────────────────── */
+.main {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--navy);
+}
+
+/* ── Page header ─────────────────────────────── */
+.page-header {
+  padding: 24px 28px 0;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+.page-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.page-title {
+  font-family: var(--font-d);
+  font-size: 1.5rem;
+  color: var(--text-pri);
+  line-height: 1;
+}
+.page-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  margin-top: 4px;
+  font-weight: 300;
+}
+.page-actions { display: flex; gap: 8px; align-items: center; }
+
+.btn {
+  font-family: var(--font-b);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 7px 16px;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, background 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-teal { background: var(--teal); color: var(--navy); }
+.btn-teal:hover { opacity: 0.88; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--divider);
+  color: var(--text-sec);
+}
+.btn-outline:hover { border-color: var(--text-sec); color: var(--text-pri); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-sec);
+  padding: 7px 10px;
+}
+.btn-ghost:hover { background: var(--navy-mid); color: var(--text-pri); }
+
+/* ── Tabs ───────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+}
+.tab {
+  padding: 10px 20px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-sec);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  user-select: none;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text-pri); }
+.tab.active {
+  color: var(--teal);
+  border-bottom-color: var(--teal);
+  font-weight: 500;
+}
+.tab-count {
+  font-size: 0.62rem;
+  background: var(--navy-mid);
+  color: var(--text-sec);
+  padding: 1px 5px;
+  border-radius: 8px;
+}
+.tab.active .tab-count {
+  background: var(--teal-dim);
+  color: var(--teal);
+}
+
+/* ── Toolbar ─────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+  background: var(--navy);
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 260px;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-sec);
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  background: var(--navy-light);
+  border: 1px solid var(--divider);
+  color: var(--text-pri);
+  font-family: var(--font-b);
+  font-size: 0.78rem;
+  padding: 7px 10px 7px 30px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input::placeholder { color: var(--text-sec); }
+.search-input:focus { border-color: var(--teal); }
+
+.filter-select {
+  background: var(--navy-light);
+  border: 1px solid var(--divider);
+  color: var(--text-sec);
+  font-family: var(--font-b);
+  font-size: 0.75rem;
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select:focus { border-color: var(--teal); }
+
+.toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.result-count { font-size: 0.72rem; color: var(--text-sec); }
+
+/* ── Summary cards ───────────────────────────── */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--divider);
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+.summary-card {
+  background: var(--navy);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.summary-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sec); }
+.summary-val { font-family: var(--font-d); font-size: 1.4rem; color: var(--text-pri); line-height: 1; }
+.summary-delta { font-size: 0.65rem; color: var(--teal); }
+
+/* ── Table ───────────────────────────────────── */
+.table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 28px 24px;
+}
+.table-wrap::-webkit-scrollbar { width: 4px; }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--navy-mid); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 0.78rem;
+}
+thead th {
+  text-align: left;
+  padding: 0 10px 10px;
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-sec);
+  border-bottom: 1px solid var(--divider);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+thead th:hover { color: var(--text-pri); }
+thead th.sorted { color: var(--teal); }
+thead th:first-child { padding-left: 0; }
+
+tbody tr {
+  border-bottom: 1px solid var(--divider);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+tbody tr:hover { background: var(--navy-light); }
+tbody tr.selected { background: var(--teal-dim); }
+tbody td {
+  padding: 11px 10px;
+  vertical-align: middle;
+  color: var(--text-pri);
+}
+tbody td:first-child { padding-left: 0; }
+
+/* ── Cell components ─────────────────────────── */
+.cell-device {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.device-icon {
+  width: 28px; height: 28px;
+  border: 1px solid var(--divider);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-sec);
+  flex-shrink: 0;
+  background: var(--navy-mid);
+}
+.device-id { font-weight: 500; color: var(--text-pri); font-size: 0.78rem; }
+.device-model { font-size: 0.68rem; color: var(--text-sec); }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.status-pill::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pill-online  { background: rgba(0,191,165,0.10); color: var(--teal); }
+.pill-online::before { background: var(--teal); box-shadow: 0 0 4px var(--teal); animation: blink 2s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.pill-offline { background: rgba(224,92,92,0.10); color: var(--red); }
+.pill-offline::before { background: var(--red); }
+.pill-sync    { background: rgba(212,160,23,0.10); color: var(--amber); }
+.pill-sync::before { background: var(--amber); animation: blink 0.8s ease infinite; }
+
+.battery-wrap { display: flex; align-items: center; gap: 7px; }
+.battery-bar {
+  width: 36px; height: 9px;
+  border: 1px solid var(--divider);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.battery-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  transition: width 0.3s;
+}
+.battery-pct { font-size: 0.72rem; color: var(--text-sec); }
+
+.hrv-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 18px;
+}
+.hrv-bar {
+  width: 3px;
+  background: var(--teal);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+.participant-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+.participant-tag .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--text-sec);
+  flex-shrink: 0;
+}
+
+.sync-time { font-size: 0.72rem; color: var(--text-sec); }
+.sync-ago  { font-size: 0.65rem; color: var(--text-sec); opacity: 0.6; }
+
+.action-row { display: flex; gap: 4px; }
+.icon-btn {
+  padding: 4px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-sec);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { border-color: var(--divider); background: var(--navy-mid); color: var(--text-pri); }
+.icon-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+.checkbox-cell {
+  width: 32px;
+  padding-right: 4px !important;
+}
+.cb {
+  width: 14px; height: 14px;
+  border: 1px solid var(--divider);
+  background: transparent;
+  cursor: pointer;
+  accent-color: var(--teal);
+}
+
+/* ── Empty state ─────────────────────────────── */
+.empty-state {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-sec);
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.empty-state svg { opacity: 0.3; }
+
+/* ── Detail drawer ───────────────────────────── */
+.drawer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,22,40,0.6);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+}
+.drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 380px;
+  background: var(--navy-light);
+  border-left: 1px solid var(--divider);
+  z-index: 201;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.drawer::-webkit-scrollbar { width: 4px; }
+.drawer::-webkit-scrollbar-thumb { background: var(--navy-mid); }
+.drawer-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.drawer-title { font-family: var(--font-d); font-size: 1.1rem; color: var(--text-pri); }
+.drawer-sub { font-size: 0.72rem; color: var(--text-sec); margin-top: 3px; }
+.drawer-close {
+  background: none;
+  border: none;
+  color: var(--text-sec);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  font-size: 1rem;
+}
+.drawer-close:hover { color: var(--text-pri); }
+.drawer-section { padding: 16px 24px; border-bottom: 1px solid var(--divider); }
+.drawer-section-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-sec);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.drawer-section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+.drawer-kv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kv { display: flex; flex-direction: column; gap: 2px; }
+.kv-label { font-size: 0.65rem; color: var(--text-sec); letter-spacing: 0.06em; }
+.kv-val { font-size: 0.82rem; color: var(--text-pri); font-weight: 500; }
+
+.mini-chart { margin-top: 12px; }
+.mini-chart-label { font-size: 0.65rem; color: var(--text-sec); margin-bottom: 8px; }
+.spark-svg { width: 100%; height: 48px; }
+
+.drawer-actions { padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; }
+.drawer-btn {
+  width: 100%;
+  padding: 9px;
+  font-family: var(--font-b);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.drawer-btn-primary { background: var(--teal); color: var(--navy); border: none; }
+.drawer-btn-primary:hover { opacity: 0.88; }
+.drawer-btn-secondary { background: transparent; border: 1px solid var(--divider); color: var(--text-sec); }
+.drawer-btn-secondary:hover { border-color: var(--text-sec); color: var(--text-pri); }
+.drawer-btn-danger { background: transparent; border: 1px solid rgba(224,92,92,0.3); color: var(--red); }
+.drawer-btn-danger:hover { background: rgba(224,92,92,0.07); }
+
+/* ── Tweaks ──────────────────────────────────── */
+.tweaks-panel {
+  position: fixed; bottom: 20px; right: 20px;
+  z-index: 9999;
+  background: rgba(21,34,56,0.97);
+  border: 1px solid var(--divider);
+  backdrop-filter: blur(12px);
+  padding: 16px;
+  width: 200px;
+  display: none;
+}
+.tweaks-panel.open { display: block; }
+.tweaks-ttl {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 12px; border-bottom: 1px solid var(--divider); padding-bottom: 8px;
+}
+.tweak-item { margin-bottom: 12px; }
+.tweak-lbl { font-size: 0.68rem; color: var(--text-sec); margin-bottom: 5px; display: block; }
+.tweak-toggle { display: flex; gap: 3px; }
+.tweak-opt {
+  flex: 1; padding: 5px 0; text-align: center;
+  font-size: 0.68rem; font-weight: 500;
+  border: 1px solid var(--divider);
+  cursor: pointer; color: var(--text-sec);
+  transition: all 0.12s;
+}
+.tweak-opt.active { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useMemo } = React;
+
+/* ── Icons ───────────────────────────────────── */
+const Icon = ({ d, size = 14, ...p }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...p}>
+    {Array.isArray(d) ? d.map((el,i) => React.createElement(el.tag, { key:i, ...el })) : <path d={d} />}
+  </svg>
+);
+
+const icons = {
+  watch:     [{tag:'rect',x:'5',y:'2',width:'14',height:'20',rx:'3'},{tag:'path',d:'M9 7h6M9 12h6M9 17h4'}],
+  users:     [{tag:'path',d:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'},{tag:'circle',cx:'9',cy:'7',r:'4'},{tag:'path',d:'M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'}],
+  study:     [{tag:'path',d:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'},{tag:'path',d:'M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'}],
+  chart:     [{tag:'line',x1:'18',y1:'20',x2:'18',y2:'10'},{tag:'line',x1:'12',y1:'20',x2:'12',y2:'4'},{tag:'line',x1:'6',y1:'20',x2:'6',y2:'14'}],
+  settings:  [{tag:'circle',cx:'12',cy:'12',r:'3'},{tag:'path',d:'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'}],
+  logout:    [{tag:'path',d:'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'},{tag:'polyline',points:'16 17 21 12 16 7'},{tag:'line',x1:'21',y1:'12',x2:'9',y2:'12'}],
+  search:    [{tag:'circle',cx:'11',cy:'11',r:'8'},{tag:'line',x1:'21',y1:'21',x2:'16.65',y2:'16.65'}],
+  filter:    [{tag:'polygon',points:'22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'}],
+  sync:      [{tag:'polyline',points:'23 4 23 10 17 10'},{tag:'polyline',points:'1 20 1 14 7 14'},{tag:'path',d:'M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15'}],
+  eye:       [{tag:'path',d:'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'},{tag:'circle',cx:'12',cy:'12',r:'3'}],
+  edit:      [{tag:'path',d:'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'},{tag:'path',d:'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'}],
+  trash:     [{tag:'polyline',points:'3 6 5 6 21 6'},{tag:'path',d:'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'},{tag:'line',x1:'10',y1:'11',x2:'10',y2:'17'},{tag:'line',x1:'14',y1:'11',x2:'14',y2:'17'}],
+  plus:      [{tag:'line',x1:'12',y1:'5',x2:'12',y2:'19'},{tag:'line',x1:'5',y1:'12',x2:'19',y2:'12'}],
+  download:  [{tag:'path',d:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'},{tag:'polyline',points:'7 10 12 15 17 10'},{tag:'line',x1:'12',y1:'15',x2:'12',y2:'3'}],
+  sort:      [{tag:'path',d:'M3 6h18M7 12h10M11 18h2'}],
+  bell:      [{tag:'path',d:'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'},{tag:'path',d:'M13.73 21a2 2 0 0 1-3.46 0'}],
+};
+
+/* ── Data ─────────────────────────────────────── */
+const DEVICES = [
+  { id:'GW-0041', model:'Galaxy Watch 6 (44mm)', status:'online',  battery:87, participant:'P-014 · Carla M.',  study:'EST-2024-A', lastSync:'2026-04-23 08:42', hr:68,  hrv:41, spo2:98, stress:28 },
+  { id:'GW-0038', model:'Galaxy Watch 5 Pro',    status:'online',  battery:61, participant:'P-009 · Rafael S.', study:'EST-2024-A', lastSync:'2026-04-23 08:39', hr:74,  hrv:36, spo2:97, stress:44 },
+  { id:'GW-0052', model:'Galaxy Watch 6 (40mm)', status:'syncing', battery:45, participant:'P-021 · Ines P.',   study:'EST-2024-B', lastSync:'2026-04-23 08:44', hr:81,  hrv:29, spo2:96, stress:62 },
+  { id:'GW-0017', model:'Galaxy Watch 4',        status:'offline', battery:12, participant:'P-003 · Bruno K.',  study:'EST-2024-A', lastSync:'2026-04-22 23:11', hr:null, hrv:null, spo2:null, stress:null },
+  { id:'GW-0063', model:'Galaxy Watch 6 (44mm)', status:'online',  battery:93, participant:'P-028 · Ana L.',    study:'EST-2024-C', lastSync:'2026-04-23 08:41', hr:65,  hrv:52, spo2:99, stress:18 },
+  { id:'GW-0029', model:'Galaxy Watch 5',        status:'online',  battery:78, participant:'P-011 · Diego V.',  study:'EST-2024-B', lastSync:'2026-04-23 08:38', hr:72,  hrv:45, spo2:98, stress:33 },
+  { id:'GW-0044', model:'Galaxy Watch 6 (40mm)', status:'offline', battery:0,  participant:'P-019 · Sofia R.',  study:'EST-2024-C', lastSync:'2026-04-21 14:55', hr:null, hrv:null, spo2:null, stress:null },
+  { id:'GW-0071', model:'Galaxy Watch 6 (44mm)', status:'syncing', battery:55, participant:'P-033 · Marco F.',  study:'EST-2024-A', lastSync:'2026-04-23 08:44', hr:77,  hrv:38, spo2:97, stress:51 },
+  { id:'GW-0012', model:'Galaxy Watch 4',        status:'online',  battery:66, participant:'P-006 · Julia H.',  study:'EST-2024-B', lastSync:'2026-04-23 08:40', hr:70,  hrv:43, spo2:98, stress:26 },
+  { id:'GW-0058', model:'Galaxy Watch 5 Pro',    status:'online',  battery:82, participant:'P-025 · Pedro N.',  study:'EST-2024-C', lastSync:'2026-04-23 08:37', hr:63,  hrv:58, spo2:99, stress:15 },
+];
+
+const PARTICIPANTS = [
+  { id:'P-003', name:'Bruno K.',  age:34, study:'EST-2024-A', device:'GW-0017', enrolled:'2026-01-10', status:'ativo' },
+  { id:'P-006', name:'Julia H.',  age:28, study:'EST-2024-B', device:'GW-0012', enrolled:'2026-01-15', status:'ativo' },
+  { id:'P-009', name:'Rafael S.', age:41, study:'EST-2024-A', device:'GW-0038', enrolled:'2025-12-05', status:'ativo' },
+  { id:'P-011', name:'Diego V.',  age:29, study:'EST-2024-B', device:'GW-0029', enrolled:'2026-02-01', status:'ativo' },
+  { id:'P-014', name:'Carla M.',  age:36, study:'EST-2024-A', device:'GW-0041', enrolled:'2025-11-20', status:'ativo' },
+  { id:'P-019', name:'Sofia R.',  age:31, study:'EST-2024-C', device:'GW-0044', enrolled:'2026-03-08', status:'pausado' },
+  { id:'P-021', name:'Ines P.',   age:45, study:'EST-2024-B', device:'GW-0052', enrolled:'2026-01-22', status:'ativo' },
+  { id:'P-025', name:'Pedro N.',  age:38, study:'EST-2024-C', device:'GW-0058', enrolled:'2026-03-01', status:'ativo' },
+  { id:'P-028', name:'Ana L.',    age:26, study:'EST-2024-C', device:'GW-0063', enrolled:'2026-02-18', status:'ativo' },
+  { id:'P-033', name:'Marco F.',  age:52, study:'EST-2024-A', device:'GW-0071', enrolled:'2025-10-30', status:'ativo' },
+];
+
+const STUDIES = [
+  { id:'EST-2024-A', title:'Estresse Crônico & HRV Longitudinal', pi:'Dr. Martins',    devices:4, participants:4, progress:68, status:'ativo'    },
+  { id:'EST-2024-B', title:'SpO₂ e Atividade Física Moderada',    pi:'Dr. Almeida',   devices:3, participants:3, progress:41, status:'ativo'    },
+  { id:'EST-2024-C', title:'Biomarcadores & Ciclo Circadiano',     pi:'Dra. Ferreira', devices:3, participants:3, progress:22, status:'ativo'    },
+  { id:'EST-2023-Z', title:'HRV em Ambientes de Alta Demanda',     pi:'Dr. Costa',     devices:0, participants:8, progress:100,status:'concluído'},
+];
+
+/* ── Helpers ─────────────────────────────────── */
+function batteryColor(pct) {
+  if (pct > 50) return 'var(--teal)';
+  if (pct > 20) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+function HRVSpark({ vals }) {
+  if (!vals) return <span style={{ color:'var(--text-sec)', fontSize:'0.7rem' }}>—</span>;
+  const max = Math.max(...vals);
+  return (
+    <div className="hrv-spark">
+      {vals.map((v,i) => (
+        <div key={i} className="hrv-bar"
+          style={{ height: `${Math.round((v / max) * 18)}px` }} />
+      ))}
+    </div>
+  );
+}
+
+function StatusPill({ status }) {
+  const map = { online:'pill-online', offline:'pill-offline', syncing:'pill-sync',
+                ativo:'pill-online', pausado:'pill-sync', concluído:'pill-offline' };
+  const label = { online:'Online', offline:'Offline', syncing:'Sincronizando',
+                  ativo:'Ativo', pausado:'Pausado', concluído:'Concluído' };
+  return <span className={`status-pill ${map[status] || ''}`}>{label[status] || status}</span>;
+}
+
+function BatteryCell({ pct }) {
+  const col = batteryColor(pct);
+  return (
+    <div className="battery-wrap">
+      <div className="battery-bar">
+        <div className="battery-fill" style={{ width:`${pct}%`, background: col }} />
+      </div>
+      <span className="battery-pct" style={{ color: col }}>{pct}%</span>
+    </div>
+  );
+}
+
+/* ── Device Detail Drawer ─────────────────────── */
+function DeviceDrawer({ device, onClose }) {
+  if (!device) return null;
+  // fake sparkline values
+  const spark = device.hrv ? [28,35,41,38,44,device.hrv,42] : null;
+  const hrSpark = device.hr ? [device.hr-8,device.hr-4,device.hr+2,device.hr-1,device.hr+5,device.hr,device.hr-2] : null;
+
+  function Sparkline({ vals, color='var(--teal)', h=48 }) {
+    if (!vals) return null;
+    const max = Math.max(...vals), min = Math.min(...vals);
+    const range = max - min || 1;
+    const w = 330, pad = 8;
+    const pts = vals.map((v,i) => {
+      const x = pad + (i / (vals.length-1)) * (w - pad*2);
+      const y = h - pad - ((v-min)/range)*(h - pad*2);
+      return `${x},${y}`;
+    }).join(' ');
+    const area = `M ${pad} ${h} L ${pts.split(' ').map((p,i) => i===0 ? p : p).join(' L ')} L ${w-pad} ${h} Z`;
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`} className="spark-svg">
+        <defs>
+          <linearGradient id={`sg${color.replace(/[^a-z]/gi,'')}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.15"/>
+            <stop offset="100%" stopColor={color} stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d={area} fill={`url(#sg${color.replace(/[^a-z]/gi,'')})`} />
+        <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
+        {vals.map((v,i) => {
+          const x = pad + (i / (vals.length-1)) * (w - pad*2);
+          const y = h - pad - ((v-min)/range)*(h - pad*2);
+          return i === vals.length-1
+            ? <circle key={i} cx={x} cy={y} r="3" fill={color} />
+            : null;
+        })}
+      </svg>
+    );
+  }
+
+  return (
+    <>
+      <div className="drawer-overlay" onClick={onClose} />
+      <div className="drawer">
+        <div className="drawer-header">
+          <div>
+            <div className="drawer-title">{device.id}</div>
+            <div className="drawer-sub">{device.model}</div>
+          </div>
+          <button className="drawer-close" onClick={onClose}>✕</button>
+        </div>
+
+        <div className="drawer-section">
+          <div className="drawer-section-label">Status atual</div>
+          <div style={{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap' }}>
+            <StatusPill status={device.status} />
+            <BatteryCell pct={device.battery} />
+          </div>
+        </div>
+
+        <div className="drawer-section">
+          <div className="drawer-section-label">Informações</div>
+          <div className="drawer-kv">
+            <div className="kv"><span className="kv-label">Participante</span><span className="kv-val">{device.participant}</span></div>
+            <div className="kv"><span className="kv-label">Estudo</span><span className="kv-val">{device.study}</span></div>
+            <div className="kv"><span className="kv-label">Último sync</span><span className="kv-val">{device.lastSync?.split(' ')[1] ?? '—'}</span></div>
+            <div className="kv"><span className="kv-label">Data</span><span className="kv-val">{device.lastSync?.split(' ')[0] ?? '—'}</span></div>
+          </div>
+        </div>
+
+        <div className="drawer-section">
+          <div className="drawer-section-label">Métricas ao vivo</div>
+          <div className="drawer-kv" style={{ marginBottom:12 }}>
+            <div className="kv"><span className="kv-label">FC</span><span className="kv-val" style={{color:'var(--teal)'}}>{device.hr ?? '—'}{device.hr ? ' bpm' : ''}</span></div>
+            <div className="kv"><span className="kv-label">HRV (RMSSD)</span><span className="kv-val">{device.hrv ?? '—'}{device.hrv ? ' ms' : ''}</span></div>
+            <div className="kv"><span className="kv-label">SpO₂</span><span className="kv-val">{device.spo2 ?? '—'}{device.spo2 ? '%' : ''}</span></div>
+            <div className="kv"><span className="kv-label">Estresse</span><span className="kv-val">{device.stress ?? '—'}{device.stress != null ? '/100' : ''}</span></div>
+          </div>
+          {hrSpark && (
+            <div className="mini-chart">
+              <div className="mini-chart-label">FC — últimas 7 leituras</div>
+              <Sparkline vals={hrSpark} color="var(--teal)" />
+            </div>
+          )}
+          {spark && (
+            <div className="mini-chart">
+              <div className="mini-chart-label">HRV — últimas 7 leituras</div>
+              <Sparkline vals={spark} color="#7B8FD4" />
+            </div>
+          )}
+        </div>
+
+        <div className="drawer-actions">
+          <button className="drawer-btn drawer-btn-primary">
+            <Icon d={icons.sync} size={13} /> Forçar sincronização
+          </button>
+          <button className="drawer-btn drawer-btn-secondary">
+            <Icon d={icons.download} size={13} /> Exportar dados
+          </button>
+          <button className="drawer-btn drawer-btn-secondary">
+            <Icon d={icons.edit} size={13} /> Editar vínculo
+          </button>
+          <button className="drawer-btn drawer-btn-danger">
+            <Icon d={icons.trash} size={13} /> Desvincular dispositivo
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ── Tab: Dispositivos ────────────────────────── */
+function DevicesTab({ density, tweaks }) {
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todos');
+  const [sortCol, setSortCol] = useState('id');
+  const [sortAsc, setSortAsc] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [checked, setChecked] = useState([]);
+
+  const filtered = useMemo(() => {
+    let d = DEVICES.filter(r =>
+      (statusFilter === 'todos' || r.status === statusFilter) &&
+      (r.id.toLowerCase().includes(query.toLowerCase()) ||
+       r.participant.toLowerCase().includes(query.toLowerCase()) ||
+       r.study.toLowerCase().includes(query.toLowerCase()))
+    );
+    d.sort((a,b) => {
+      const va = a[sortCol] ?? '';
+      const vb = b[sortCol] ?? '';
+      return sortAsc
+        ? String(va).localeCompare(String(vb), undefined, {numeric:true})
+        : String(vb).localeCompare(String(va), undefined, {numeric:true});
+    });
+    return d;
+  }, [query, statusFilter, sortCol, sortAsc]);
+
+  function toggleSort(col) {
+    if (sortCol === col) setSortAsc(a => !a);
+    else { setSortCol(col); setSortAsc(true); }
+  }
+
+  function Th({ col, label }) {
+    const active = sortCol === col;
+    return (
+      <th className={active ? 'sorted' : ''} onClick={() => toggleSort(col)}>
+        {label} {active ? (sortAsc ? '↑' : '↓') : ''}
+      </th>
+    );
+  }
+
+  const rowPad = density === 'compact' ? '7px 10px' : '11px 10px';
+
+  const counts = {
+    online: DEVICES.filter(d=>d.status==='online').length,
+    offline: DEVICES.filter(d=>d.status==='offline').length,
+    syncing: DEVICES.filter(d=>d.status==='syncing').length,
+  };
+  const avgBattery = Math.round(DEVICES.reduce((s,d) => s+d.battery, 0) / DEVICES.length);
+  const avgHR = Math.round(DEVICES.filter(d=>d.hr).reduce((s,d)=>s+d.hr,0) / DEVICES.filter(d=>d.hr).length);
+
+  return (
+    <>
+      <div className="summary-row">
+        <div className="summary-card">
+          <div className="summary-label">Dispositivos online</div>
+          <div className="summary-val" style={{color:'var(--teal)'}}>{counts.online}</div>
+          <div className="summary-delta">↑ de {DEVICES.length} totais</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-label">Offline</div>
+          <div className="summary-val" style={{color:'var(--red)'}}>{counts.offline}</div>
+          <div className="summary-delta" style={{color:'var(--red)'}}>Atenção</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-label">Bateria média</div>
+          <div className="summary-val">{avgBattery}<span style={{fontSize:'0.8rem',fontFamily:'var(--font-b)',color:'var(--text-sec)'}}> %</span></div>
+          <div className="summary-delta">todos os dispositivos</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-label">FC média</div>
+          <div className="summary-val">{avgHR}<span style={{fontSize:'0.8rem',fontFamily:'var(--font-b)',color:'var(--text-sec)'}}> bpm</span></div>
+          <div className="summary-delta">participantes online</div>
+        </div>
+      </div>
+
+      <div className="toolbar">
+        <div className="search-wrap">
+          <Icon d={icons.search} size={13} />
+          <input className="search-input" placeholder="Buscar por ID, participante..."
+            value={query} onChange={e=>setQuery(e.target.value)} />
+        </div>
+        <select className="filter-select" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
+          <option value="todos">Todos os status</option>
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+          <option value="syncing">Sincronizando</option>
+        </select>
+        <div className="toolbar-right">
+          <span className="result-count">{filtered.length} dispositivos</span>
+          <button className="btn btn-outline"><Icon d={icons.download} size={12} /> Exportar</button>
+          <button className="btn btn-teal"><Icon d={icons.plus} size={12} /> Vincular</button>
+        </div>
+      </div>
+
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th className="checkbox-cell"><input type="checkbox" className="cb" /></th>
+              <Th col="id" label="Dispositivo" />
+              <Th col="status" label="Status" />
+              <Th col="battery" label="Bateria" />
+              <th>HRV</th>
+              <Th col="participant" label="Participante" />
+              <Th col="study" label="Estudo" />
+              <Th col="lastSync" label="Último Sync" />
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(d => {
+              const spark = d.hrv ? [d.hrv-12,d.hrv-5,d.hrv+3,d.hrv-2,d.hrv+7,d.hrv] : null;
+              const isSelected = selected?.id === d.id;
+              return (
+                <tr key={d.id} className={isSelected ? 'selected' : ''}
+                  onClick={() => setSelected(prev => prev?.id===d.id ? null : d)}>
+                  <td className="checkbox-cell" onClick={e=>e.stopPropagation()}>
+                    <input type="checkbox" className="cb" />
+                  </td>
+                  <td style={{ padding: rowPad }}>
+                    <div className="cell-device">
+                      <div className="device-icon">
+                        <Icon d={icons.watch} size={13} />
+                      </div>
+                      <div>
+                        <div className="device-id">{d.id}</div>
+                        <div className="device-model">{d.model}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: rowPad }}><StatusPill status={d.status} /></td>
+                  <td style={{ padding: rowPad }}><BatteryCell pct={d.battery} /></td>
+                  <td style={{ padding: rowPad }}><HRVSpark vals={spark} /></td>
+                  <td style={{ padding: rowPad }}>
+                    <div className="participant-tag">
+                      <div className="dot" />
+                      {d.participant}
+                    </div>
+                  </td>
+                  <td style={{ padding: rowPad, color:'var(--text-sec)' }}>{d.study}</td>
+                  <td style={{ padding: rowPad }}>
+                    <div className="sync-time">{d.lastSync?.split(' ')[1]}</div>
+                    <div className="sync-ago">{d.lastSync?.split(' ')[0]}</div>
+                  </td>
+                  <td style={{ padding: rowPad }}>
+                    <div className="action-row" onClick={e=>e.stopPropagation()}>
+                      <button className="icon-btn" title="Ver detalhes"
+                        onClick={() => setSelected(prev => prev?.id===d.id ? null : d)}>
+                        <Icon d={icons.eye} size={13} />
+                      </button>
+                      <button className="icon-btn" title="Sincronizar">
+                        <Icon d={icons.sync} size={13} />
+                      </button>
+                      <button className="icon-btn danger" title="Remover">
+                        <Icon d={icons.trash} size={13} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {filtered.length === 0 && (
+          <div className="empty-state">
+            <Icon d={icons.watch} size={32} />
+            <span>Nenhum dispositivo encontrado</span>
+          </div>
+        )}
+      </div>
+
+      <DeviceDrawer device={selected} onClose={() => setSelected(null)} />
+    </>
+  );
+}
+
+/* ── Tab: Participantes ───────────────────────── */
+function ParticipantsTab({ density }) {
+  const [query, setQuery] = useState('');
+  const rowPad = density === 'compact' ? '7px 10px' : '11px 10px';
+  const filtered = PARTICIPANTS.filter(p =>
+    p.id.toLowerCase().includes(query.toLowerCase()) ||
+    p.name.toLowerCase().includes(query.toLowerCase()) ||
+    p.study.toLowerCase().includes(query.toLowerCase())
+  );
+  return (
+    <>
+      <div className="toolbar">
+        <div className="search-wrap">
+          <Icon d={icons.search} size={13} />
+          <input className="search-input" placeholder="Buscar participante..."
+            value={query} onChange={e=>setQuery(e.target.value)} />
+        </div>
+        <div className="toolbar-right">
+          <span className="result-count">{filtered.length} participantes</span>
+          <button className="btn btn-outline"><Icon d={icons.download} size={12} /> Exportar</button>
+          <button className="btn btn-teal"><Icon d={icons.plus} size={12} /> Adicionar</button>
+        </div>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th className="checkbox-cell"><input type="checkbox" className="cb" /></th>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Idade</th>
+              <th>Estudo</th>
+              <th>Dispositivo</th>
+              <th>Ingresso</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(p => (
+              <tr key={p.id}>
+                <td className="checkbox-cell"><input type="checkbox" className="cb" /></td>
+                <td style={{padding:rowPad,color:'var(--teal)',fontWeight:500,fontFamily:'monospace',fontSize:'0.8rem'}}>{p.id}</td>
+                <td style={{padding:rowPad,fontWeight:500}}>{p.name}</td>
+                <td style={{padding:rowPad,color:'var(--text-sec)'}}>{p.age} anos</td>
+                <td style={{padding:rowPad,color:'var(--text-sec)'}}>{p.study}</td>
+                <td style={{padding:rowPad}}>
+                  <span style={{fontSize:'0.72rem',background:'var(--navy-mid)',padding:'2px 8px',color:'var(--text-sec)'}}>{p.device}</span>
+                </td>
+                <td style={{padding:rowPad,color:'var(--text-sec)',fontSize:'0.75rem'}}>{p.enrolled}</td>
+                <td style={{padding:rowPad}}><StatusPill status={p.status} /></td>
+                <td style={{padding:rowPad}}>
+                  <div className="action-row">
+                    <button className="icon-btn"><Icon d={icons.eye} size={13} /></button>
+                    <button className="icon-btn"><Icon d={icons.edit} size={13} /></button>
+                    <button className="icon-btn danger"><Icon d={icons.trash} size={13} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+/* ── Tab: Estudos ─────────────────────────────── */
+function StudiesTab({ density }) {
+  const rowPad = density === 'compact' ? '7px 10px' : '11px 10px';
+  return (
+    <>
+      <div className="toolbar">
+        <div className="toolbar-right" style={{marginLeft:0}}>
+          <button className="btn btn-outline"><Icon d={icons.download} size={12} /> Exportar</button>
+          <button className="btn btn-teal"><Icon d={icons.plus} size={12} /> Novo estudo</button>
+        </div>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Investigador</th>
+              <th>Dispositivos</th>
+              <th>Participantes</th>
+              <th>Progresso</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {STUDIES.map(s => (
+              <tr key={s.id}>
+                <td style={{padding:rowPad,fontFamily:'monospace',fontSize:'0.78rem',color:'var(--teal)'}}>{s.id}</td>
+                <td style={{padding:rowPad,fontWeight:500,maxWidth:260}}>
+                  <div style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:220}}>{s.title}</div>
+                </td>
+                <td style={{padding:rowPad,color:'var(--text-sec)'}}>{s.pi}</td>
+                <td style={{padding:rowPad,textAlign:'center'}}>{s.devices}</td>
+                <td style={{padding:rowPad,textAlign:'center'}}>{s.participants}</td>
+                <td style={{padding:rowPad,minWidth:100}}>
+                  <div style={{display:'flex',alignItems:'center',gap:8}}>
+                    <div style={{flex:1,height:4,background:'var(--navy-mid)',position:'relative',overflow:'hidden'}}>
+                      <div style={{
+                        position:'absolute',left:0,top:0,bottom:0,
+                        width:`${s.progress}%`,
+                        background: s.progress===100 ? 'var(--text-sec)' : 'var(--teal)',
+                        transition:'width 0.5s'
+                      }} />
+                    </div>
+                    <span style={{fontSize:'0.68rem',color:'var(--text-sec)',minWidth:28}}>{s.progress}%</span>
+                  </div>
+                </td>
+                <td style={{padding:rowPad}}><StatusPill status={s.status} /></td>
+                <td style={{padding:rowPad}}>
+                  <div className="action-row">
+                    <button className="icon-btn"><Icon d={icons.eye} size={13} /></button>
+                    <button className="icon-btn"><Icon d={icons.edit} size={13} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+/* ── Tweaks Panel ─────────────────────────────── */
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "density": "compact",
+  "accentColor": "#00BFA5"
+}/*EDITMODE-END*/;
+
+function TweaksPanel({ open, tweaks, onChange }) {
+  if (!open) return null;
+  return (
+    <div className="tweaks-panel open">
+      <div className="tweaks-ttl">Tweaks</div>
+      <div className="tweak-item">
+        <span className="tweak-lbl">Densidade da tabela</span>
+        <div className="tweak-toggle">
+          {['normal','compact'].map(v => (
+            <div key={v} className={`tweak-opt ${tweaks.density===v?'active':''}`}
+              onClick={()=>onChange('density',v)}>{v}</div>
+          ))}
+        </div>
+      </div>
+      <div className="tweak-item">
+        <span className="tweak-lbl">Cor de acento</span>
+        <div className="tweak-toggle">
+          {['#00BFA5','#00A8E8','#7B8FD4'].map(c => (
+            <div key={c} className={`tweak-opt ${tweaks.accentColor===c?'active':''}`}
+              style={tweaks.accentColor===c?{background:c,borderColor:c,color:'#0A1628'}:{}}
+              onClick={()=>onChange('accentColor',c)}>
+              <span style={{display:'inline-block',width:10,height:10,borderRadius:'50%',background:c,verticalAlign:'middle'}} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── App ─────────────────────────────────────── */
+const NAV = [
+  { id:'devices',      label:'Dispositivos', icon:'watch',    badge:'10' },
+  { id:'participants', label:'Participantes',icon:'users',    badge:'10' },
+  { id:'studies',      label:'Estudos',      icon:'study',    badge:'4'  },
+  { id:'analytics',   label:'Analytics',    icon:'chart',    badge:null },
+];
+
+function App() {
+  const [activeNav, setActiveNav] = useState('devices');
+  const [activeTab, setActiveTab] = useState('devices');
+  const [tweaksOpen, setTweaksOpen] = useState(false);
+  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    const handler = e => {
+      if (e.data?.type === '__activate_edit_mode')   setTweaksOpen(true);
+      if (e.data?.type === '__deactivate_edit_mode') setTweaksOpen(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const changeTweak = (k, v) => {
+    setTweaks(prev => {
+      const next = { ...prev, [k]: v };
+      if (k === 'accentColor') {
+        document.documentElement.style.setProperty('--teal', v);
+        document.documentElement.style.setProperty('--teal-glow', v + '44');
+        document.documentElement.style.setProperty('--teal-dim', v + '1a');
+      }
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: next }, '*');
+      return next;
+    });
+  };
+
+  const tabCounts = { devices:'10', participants:'10', studies:'4', analytics:'' };
+
+  const tabs = activeNav === 'devices' ? [
+    { id:'devices', label:'Dispositivos' },
+    { id:'alerts',  label:'Alertas' },
+    { id:'log',     label:'Log de eventos' },
+  ] : activeNav === 'participants' ? [
+    { id:'participants', label:'Participantes' },
+    { id:'consent',     label:'TCLEs' },
+  ] : activeNav === 'studies' ? [
+    { id:'studies', label:'Estudos' },
+    { id:'protocols', label:'Protocolos' },
+  ] : [
+    { id:'analytics', label:'Visão geral' },
+  ];
+
+  function renderContent() {
+    if (activeNav === 'devices' || activeTab === 'devices')
+      return <DevicesTab density={tweaks.density} tweaks={tweaks} />;
+    if (activeNav === 'participants')
+      return <ParticipantsTab density={tweaks.density} />;
+    if (activeNav === 'studies')
+      return <StudiesTab density={tweaks.density} />;
+    return (
+      <div className="empty-state" style={{ marginTop: 48 }}>
+        <Icon d={icons.chart} size={32} />
+        <span>Analytics em desenvolvimento</span>
+      </div>
+    );
+  }
+
+  const pageLabels = {
+    devices: { title: 'Dispositivos', sub: 'Gerenciar smartwatches conectados e monitorar métricas ao vivo' },
+    participants: { title: 'Participantes', sub: 'Cadastro e gerenciamento de participantes dos estudos' },
+    studies: { title: 'Estudos', sub: 'Protocolos de pesquisa ativos e histórico' },
+    analytics: { title: 'Analytics', sub: 'Visualizações e relatórios consolidados' },
+  };
+
+  return (
+    <div className="shell">
+      {/* Topbar */}
+      <div className="topbar">
+        <div className="topbar-logo">
+          <div className="pulse-dot" />
+          PulseLab
+        </div>
+        <div className="topbar-sep" />
+        <div className="topbar-breadcrumb">
+          Admin <span>/ {pageLabels[activeNav]?.title}</span>
+        </div>
+        <div className="topbar-right">
+          <div className="topbar-tag">⚠ Acesso restrito</div>
+          <button className="icon-btn" style={{ color:'var(--text-sec)' }}>
+            <Icon d={icons.bell} size={15} />
+          </button>
+          <div className="topbar-user">
+            <div className="avatar">DR</div>
+            <span className="topbar-username">Dr. Martins</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sidebar */}
+      <div className="sidebar">
+        <div className="nav-group-label">Principal</div>
+        {NAV.map(n => (
+          <div key={n.id} className={`nav-item ${activeNav===n.id?'active':''}`}
+            onClick={() => { setActiveNav(n.id); setActiveTab(n.id); }}>
+            <Icon d={icons[n.icon]} size={14} />
+            {n.label}
+            {n.badge && <span className="nav-badge">{n.badge}</span>}
+          </div>
+        ))}
+
+        <div className="nav-sep" />
+        <div className="nav-group-label">Sistema</div>
+        <div className={`nav-item ${activeNav==='settings'?'active':''}`}
+          onClick={() => setActiveNav('settings')}>
+          <Icon d={icons.settings} size={14} />
+          Configurações
+        </div>
+        <div className="sidebar-bottom">
+          <div className="nav-item">
+            <Icon d={icons.logout} size={14} />
+            Sair
+          </div>
+        </div>
+      </div>
+
+      {/* Main */}
+      <div className="main">
+        <div className="page-header">
+          <div className="page-title-row">
+            <div>
+              <div className="page-title">{pageLabels[activeNav]?.title}</div>
+              <div className="page-subtitle">{pageLabels[activeNav]?.sub}</div>
+            </div>
+          </div>
+          <div className="tabs">
+            {tabs.map(t => (
+              <div key={t.id} className={`tab ${activeTab===t.id?'active':''}`}
+                onClick={() => setActiveTab(t.id)}>
+                {t.label}
+                {tabCounts[t.id] && <span className="tab-count">{tabCounts[t.id]}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {renderContent()}
+      </div>
+
+      <TweaksPanel open={tweaksOpen} tweaks={tweaks} onChange={changeTweak} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
