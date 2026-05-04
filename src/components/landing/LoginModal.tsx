@@ -97,7 +97,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>E-mail institucional</label>
+            <label style={labelStyle}>E-mail</label>
             <input
               type="email"
               value={email}

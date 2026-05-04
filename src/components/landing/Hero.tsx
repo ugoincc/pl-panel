@@ -1,11 +1,8 @@
+import { SignInButton } from '@clerk/react'
 import ECGLine from './ECGLine'
 import MetricCard from './MetricCard'
 
-interface HeroProps {
-  onLogin: () => void
-}
-
-export default function Hero({ onLogin }: HeroProps) {
+export default function Hero() {
   return (
     <div
       style={{
@@ -97,34 +94,35 @@ export default function Hero({ onLogin }: HeroProps) {
         </p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-          <button
-            onClick={onLogin}
-            style={{
-              background: '#00BFA5',
-              color: '#0A1628',
-              border: 'none',
-              fontFamily: '"Space Grotesk", sans-serif',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              padding: '14px 36px',
-              cursor: 'pointer',
-              transition: 'opacity 0.2s, box-shadow 0.2s, transform 0.15s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.9'
-              e.currentTarget.style.boxShadow = '0 0 28px rgba(0,191,165,0.35)'
-              e.currentTarget.style.transform = 'translateY(-1px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1'
-              e.currentTarget.style.boxShadow = 'none'
-              e.currentTarget.style.transform = 'none'
-            }}
-          >
-            Acessar Plataforma
-          </button>
+          <SignInButton mode="modal">
+            <button
+              style={{
+                background: '#00BFA5',
+                color: '#0A1628',
+                border: 'none',
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                padding: '14px 36px',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s, box-shadow 0.2s, transform 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.9'
+                e.currentTarget.style.boxShadow = '0 0 28px rgba(0,191,165,0.35)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1'
+                e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.transform = 'none'
+              }}
+            >
+              Acessar Plataforma
+            </button>
+          </SignInButton>
 
           <button
             onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}

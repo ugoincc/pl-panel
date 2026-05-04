@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Heart, Activity, Smile, Clock } from 'lucide-react'
 import { Route as panelRoute } from './panel/index.tsx'
@@ -6,7 +5,6 @@ import Nav from '../components/landing/Nav'
 import Hero from '../components/landing/Hero'
 import SensorCard from '../components/landing/SensorCard'
 import HowItWorks from '../components/landing/HowItWorks'
-import LoginModal from '../components/landing/LoginModal'
 import LandingFooter from '../components/landing/LandingFooter'
 
 export const Route = createFileRoute('/')({ component: LandingPage })
@@ -43,15 +41,13 @@ const sensors = [
 ]
 
 function LandingPage() {
-  const [loginOpen, setLoginOpen] = useState(false)
   const router = useRouter()
 
   return (
     <div className="landing">
-      <Nav onLogin={() => setLoginOpen(true)} />
-      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <Nav />
 
-      <Hero onLogin={() => setLoginOpen(true)} />
+      <Hero />
 
       {/* ── O que é ── */}
       <section id="about" style={{ padding: '96px 48px', maxWidth: 1200, margin: '0 auto' }}>

@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Show, SignInButton, UserButton } from '@clerk/react'
 
-interface NavProps {
-  onLogin: () => void
-}
-
-export default function Nav({ onLogin }: NavProps) {
+export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -55,32 +52,40 @@ export default function Nav({ onLogin }: NavProps) {
         />
         PulseLab
       </div>
-      <button
-        onClick={onLogin}
-        style={{
-          background: 'transparent',
-          border: '1px solid #00BFA5',
-          color: '#00BFA5',
-          fontFamily: '"Space Grotesk", sans-serif',
-          fontSize: '0.8rem',
-          fontWeight: 500,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          padding: '9px 22px',
-          cursor: 'pointer',
-          transition: 'background 0.2s, color 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#00BFA5'
-          e.currentTarget.style.color = '#0A1628'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'transparent'
-          e.currentTarget.style.color = '#00BFA5'
-        }}
-      >
-        Acessar Plataforma
-      </button>
+
+      <Show when="signed-out">
+        <SignInButton mode="modal">
+          <button
+            style={{
+              background: 'transparent',
+              border: '1px solid #00BFA5',
+              color: '#00BFA5',
+              fontFamily: '"Space Grotesk", sans-serif',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              padding: '9px 22px',
+              cursor: 'pointer',
+              transition: 'background 0.2s, color 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#00BFA5'
+              e.currentTarget.style.color = '#0A1628'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = '#00BFA5'
+            }}
+          >
+            Acessar Plataforma
+          </button>
+        </SignInButton>
+      </Show>
+
+      <Show when="signed-in">
+        <UserButton />
+      </Show>
     </nav>
   )
 }
