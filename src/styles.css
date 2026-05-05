@@ -165,14 +165,27 @@ body,
 
 body {
   margin: 0;
-  color: var(--sea-ink);
+  color: var(--sea-ink-soft);
   font-family: var(--font-sans);
   background-color: var(--bg-base);
   background:
-    radial-gradient(1100px 620px at -8% -10%, var(--hero-a), transparent 58%),
-    radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
-    radial-gradient(720px 380px at 50% 115%, rgba(79, 184, 178, 0.1), transparent 68%),
-    linear-gradient(180deg, color-mix(in oklab, var(--sand) 68%, white) 0%, var(--foam) 44%, var(--bg-base) 100%);
+    radial-gradient(1100px 620px at -8% -10%, var(--pl-navy), transparent 58%),
+    radial-gradient(
+      1050px 620px at 112% -12%,
+      var(--pl-navy-mid),
+      transparent 62%
+    ),
+    radial-gradient(
+      720px 380px at 50% 115%,
+      rgba(79, 184, 178, 0.1),
+      transparent 68%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--sand) 68%, white) 0%,
+      var(--foam) 44%,
+      var(--bg-base) 100%
+    );
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -186,8 +199,16 @@ body::before {
   z-index: -1;
   opacity: 0.28;
   background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.8), transparent 34%),
-    radial-gradient(circle at 78% 26%, rgba(79, 184, 178, 0.2), transparent 42%),
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(255, 255, 255, 0.8),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 78% 26%,
+      rgba(79, 184, 178, 0.2),
+      transparent 42%
+    ),
     radial-gradient(circle at 42% 82%, rgba(47, 106, 74, 0.14), transparent 36%);
 }
 
@@ -260,7 +281,11 @@ pre code {
 }
 
 .feature-card {
-  background: linear-gradient(165deg, color-mix(in oklab, var(--surface-strong) 93%, white 7%), var(--surface));
+  background: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--surface-strong) 93%, white 7%),
+    var(--surface)
+  );
   box-shadow:
     0 1px 0 var(--inset-glint) inset,
     0 18px 34px rgba(30, 90, 72, 0.1),
@@ -275,7 +300,10 @@ pre code {
 button,
 .island-shell,
 a {
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease,
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
     transform 180ms ease;
 }
 
@@ -351,14 +379,14 @@ a {
    ═══════════════════════════════════════════════════ */
 
 .pl-dark {
-  --pl-navy:       #0A1628;
+  --pl-navy: #0a1628;
   --pl-navy-light: #152238;
-  --pl-navy-mid:   #1E3048;
-  --pl-teal:       #00BFA5;
-  --pl-teal-dim:   rgba(0, 191, 165, 0.12);
-  --pl-teal-glow:  rgba(0, 191, 165, 0.35);
-  --pl-text:       #F0F4F8;
-  --pl-text-sec:   #8A9BB0;
+  --pl-navy-mid: #1e3048;
+  --pl-teal: #00bfa5;
+  --pl-teal-dim: rgba(0, 191, 165, 0.12);
+  --pl-teal-glow: rgba(0, 191, 165, 0.35);
+  --pl-text: #f0f4f8;
+  --pl-text-sec: #8a9bb0;
 
   background: var(--pl-navy);
   color: var(--pl-text);
@@ -375,31 +403,54 @@ a {
    ═══════════════════════════════════════════════════ */
 
 @keyframes pl-ecg-draw {
-  0%   { stroke-dashoffset: 1; opacity: 0; }
-  5%   { opacity: 1; }
-  80%  { opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
 }
 
 @keyframes pl-heartbeat {
-  0%, 100% { transform: scale(1);   opacity: 1; }
-  50%       { transform: scale(1.5); opacity: 0.7; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.7;
+  }
 }
 
 @keyframes pl-fade-up {
-  from { opacity: 0; transform: translateY(28px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .landing {
-  --pl-navy:       #0A1628;
+  --pl-navy: #0a1628;
   --pl-navy-light: #152238;
-  --pl-navy-mid:   #1E3048;
-  --pl-teal:       #00BFA5;
-  --pl-teal-dim:   rgba(0, 191, 165, 0.12);
-  --pl-teal-glow:  rgba(0, 191, 165, 0.35);
-  --pl-text:       #F0F4F8;
-  --pl-text-sec:   #8A9BB0;
+  --pl-navy-mid: #1e3048;
+  --pl-teal: #00bfa5;
+  --pl-teal-dim: rgba(0, 191, 165, 0.12);
+  --pl-teal-glow: rgba(0, 191, 165, 0.35);
+  --pl-text: #f0f4f8;
+  --pl-text-sec: #8a9bb0;
 
   background: var(--pl-navy);
   color: var(--pl-text);
@@ -411,9 +462,16 @@ a {
   -webkit-font-smoothing: antialiased;
 }
 
-.landing ::-webkit-scrollbar { width: 6px; }
-.landing ::-webkit-scrollbar-track { background: var(--pl-navy); }
-.landing ::-webkit-scrollbar-thumb { background: var(--pl-navy-mid); border-radius: 3px; }
+.landing ::-webkit-scrollbar {
+  width: 6px;
+}
+.landing ::-webkit-scrollbar-track {
+  background: var(--pl-navy);
+}
+.landing ::-webkit-scrollbar-thumb {
+  background: var(--pl-navy-mid);
+  border-radius: 3px;
+}
 
 .pl-ecg-line {
   stroke-dasharray: 1;
@@ -425,11 +483,21 @@ a {
   animation: pl-heartbeat 1.4s ease-in-out infinite;
 }
 
-.pl-reveal { animation: pl-fade-up 0.7s ease both; }
-.pl-reveal-d1 { animation-delay: 0.1s; }
-.pl-reveal-d2 { animation-delay: 0.22s; }
-.pl-reveal-d3 { animation-delay: 0.34s; }
-.pl-reveal-d4 { animation-delay: 0.46s; }
+.pl-reveal {
+  animation: pl-fade-up 0.7s ease both;
+}
+.pl-reveal-d1 {
+  animation-delay: 0.1s;
+}
+.pl-reveal-d2 {
+  animation-delay: 0.22s;
+}
+.pl-reveal-d3 {
+  animation-delay: 0.34s;
+}
+.pl-reveal-d4 {
+  animation-delay: 0.46s;
+}
 
 .pl-sensor-card {
   background: var(--pl-navy);
@@ -444,21 +512,31 @@ a {
 }
 .pl-sensor-card::before {
   content: '';
-  position: absolute; top: 0; left: 0; right: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 2px;
   background: var(--pl-teal);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.35s ease;
 }
-.pl-sensor-card:hover::before { transform: scaleX(1); }
-.pl-sensor-card:hover { background: rgba(21, 34, 56, 0.8); }
+.pl-sensor-card:hover::before {
+  transform: scaleX(1);
+}
+.pl-sensor-card:hover {
+  background: rgba(21, 34, 56, 0.8);
+}
 
 .pl-sensor-icon {
-  width: 44px; height: 44px;
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--pl-teal);
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 24px;
   color: var(--pl-teal);
   position: relative;
@@ -466,7 +544,8 @@ a {
 }
 .pl-sensor-icon::after {
   content: '';
-  position: absolute; inset: -6px;
+  position: absolute;
+  inset: -6px;
   border-radius: 50%;
   border: 1px solid rgba(0, 191, 165, 0.15);
 }
@@ -480,9 +559,11 @@ a {
 .pl-steps-grid::before {
   content: '';
   position: absolute;
-  top: 28px; left: 16.7%; right: 16.7%;
+  top: 28px;
+  left: 16.7%;
+  right: 16.7%;
   height: 1px;
-  background: linear-gradient(90deg, #00BFA5, rgba(0, 191, 165, 0.35), #00BFA5);
+  background: linear-gradient(90deg, #00bfa5, rgba(0, 191, 165, 0.35), #00bfa5);
   opacity: 0.4;
 }
 
@@ -490,9 +571,13 @@ a {
   .pl-steps-grid {
     grid-template-columns: 1fr;
   }
-  .pl-steps-grid::before { display: none; }
+  .pl-steps-grid::before {
+    display: none;
+  }
 
-  .pl-metrics-strip { display: none !important; }
+  .pl-metrics-strip {
+    display: none !important;
+  }
 
   .pl-about-grid {
     grid-template-columns: 1fr !important;
@@ -514,6 +599,51 @@ a {
    Admin Panel
    ═══════════════════════════════════════════════════ */
 
-@keyframes admin-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-.admin-dot-online  { animation: admin-blink 2s ease infinite; }
-.admin-dot-syncing { animation: admin-blink 0.8s ease infinite; }
+@keyframes admin-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+.admin-dot-online {
+  animation: admin-blink 2s ease infinite;
+}
+.admin-dot-syncing {
+  animation: admin-blink 0.8s ease infinite;
+}
+
+/* ═══════════════════════════════════════════════════
+   Auth Pages
+   ═══════════════════════════════════════════════════ */
+
+.auth-bg {
+  position: relative;
+  background: #0a1628;
+}
+
+.auth-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 191, 165, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 191, 165, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(circle at 50% 50%, black, transparent 80%);
+}
+
+.auth-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(800px 500px at 50% 0%, rgba(0, 191, 165, 0.08), transparent 60%),
+    radial-gradient(600px 400px at 100% 100%, rgba(0, 191, 165, 0.05), transparent 55%);
+}

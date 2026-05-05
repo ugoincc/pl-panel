@@ -4,23 +4,24 @@ import {
   Watch, Users, BookOpen, BarChart3, Settings, LogOut,
   Search, Download, Plus, Eye, RefreshCw, Trash2, Bell, Pencil,
 } from 'lucide-react'
+import { UserButton } from '@clerk/react'
 
-export const Route = createFileRoute('/panel/')({ component: PanelPage })
+export const Route = createFileRoute('/_authenticated/panel/')({ component: PanelPage })
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const C = {
-  navy:      '#0A1628',
+  navy: '#0A1628',
   navyLight: '#152238',
-  navyMid:   '#1E3048',
+  navyMid: '#1E3048',
   navyHover: '#1a2d47',
-  teal:      '#00BFA5',
-  tealDim:   'rgba(0,191,165,0.10)',
-  tealGlow:  'rgba(0,191,165,0.30)',
-  text:      '#F0F4F8',
-  textSec:   '#8A9BB0',
-  divider:   '#1E3048',
-  red:       '#E05C5C',
-  amber:     '#D4A017',
+  teal: '#00BFA5',
+  tealDim: 'rgba(0,191,165,0.10)',
+  tealGlow: 'rgba(0,191,165,0.30)',
+  text: '#F0F4F8',
+  textSec: '#8A9BB0',
+  divider: '#1E3048',
+  red: '#E05C5C',
+  amber: '#D4A017',
 } as const
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -46,54 +47,54 @@ interface Study {
 
 // ── Mock data ──────────────────────────────────────────────────────────────────
 const DEVICES: Device[] = [
-  { id: 'GW-0041', model: 'Galaxy Watch 6 (44mm)', status: 'online',  battery: 87, participant: 'P-014 · Carla M.',  study: 'EST-2024-A', lastSync: '2026-04-23 08:42', hr: 68,  hrv: 41, spo2: 98, stress: 28 },
-  { id: 'GW-0038', model: 'Galaxy Watch 5 Pro',    status: 'online',  battery: 61, participant: 'P-009 · Rafael S.', study: 'EST-2024-A', lastSync: '2026-04-23 08:39', hr: 74,  hrv: 36, spo2: 97, stress: 44 },
-  { id: 'GW-0052', model: 'Galaxy Watch 6 (40mm)', status: 'syncing', battery: 45, participant: 'P-021 · Ines P.',   study: 'EST-2024-B', lastSync: '2026-04-23 08:44', hr: 81,  hrv: 29, spo2: 96, stress: 62 },
-  { id: 'GW-0017', model: 'Galaxy Watch 4',        status: 'offline', battery: 12, participant: 'P-003 · Bruno K.',  study: 'EST-2024-A', lastSync: '2026-04-22 23:11', hr: null, hrv: null, spo2: null, stress: null },
-  { id: 'GW-0063', model: 'Galaxy Watch 6 (44mm)', status: 'online',  battery: 93, participant: 'P-028 · Ana L.',    study: 'EST-2024-C', lastSync: '2026-04-23 08:41', hr: 65,  hrv: 52, spo2: 99, stress: 18 },
-  { id: 'GW-0029', model: 'Galaxy Watch 5',        status: 'online',  battery: 78, participant: 'P-011 · Diego V.',  study: 'EST-2024-B', lastSync: '2026-04-23 08:38', hr: 72,  hrv: 45, spo2: 98, stress: 33 },
-  { id: 'GW-0044', model: 'Galaxy Watch 6 (40mm)', status: 'offline', battery: 0,  participant: 'P-019 · Sofia R.',  study: 'EST-2024-C', lastSync: '2026-04-21 14:55', hr: null, hrv: null, spo2: null, stress: null },
-  { id: 'GW-0071', model: 'Galaxy Watch 6 (44mm)', status: 'syncing', battery: 55, participant: 'P-033 · Marco F.',  study: 'EST-2024-A', lastSync: '2026-04-23 08:44', hr: 77,  hrv: 38, spo2: 97, stress: 51 },
-  { id: 'GW-0012', model: 'Galaxy Watch 4',        status: 'online',  battery: 66, participant: 'P-006 · Julia H.',  study: 'EST-2024-B', lastSync: '2026-04-23 08:40', hr: 70,  hrv: 43, spo2: 98, stress: 26 },
-  { id: 'GW-0058', model: 'Galaxy Watch 5 Pro',    status: 'online',  battery: 82, participant: 'P-025 · Pedro N.',  study: 'EST-2024-C', lastSync: '2026-04-23 08:37', hr: 63,  hrv: 58, spo2: 99, stress: 15 },
+  { id: 'GW-0041', model: 'Galaxy Watch 6 (44mm)', status: 'online', battery: 87, participant: 'P-014 · Carla M.', study: 'EST-2024-A', lastSync: '2026-04-23 08:42', hr: 68, hrv: 41, spo2: 98, stress: 28 },
+  { id: 'GW-0038', model: 'Galaxy Watch 5 Pro', status: 'online', battery: 61, participant: 'P-009 · Rafael S.', study: 'EST-2024-A', lastSync: '2026-04-23 08:39', hr: 74, hrv: 36, spo2: 97, stress: 44 },
+  { id: 'GW-0052', model: 'Galaxy Watch 6 (40mm)', status: 'syncing', battery: 45, participant: 'P-021 · Ines P.', study: 'EST-2024-B', lastSync: '2026-04-23 08:44', hr: 81, hrv: 29, spo2: 96, stress: 62 },
+  { id: 'GW-0017', model: 'Galaxy Watch 4', status: 'offline', battery: 12, participant: 'P-003 · Bruno K.', study: 'EST-2024-A', lastSync: '2026-04-22 23:11', hr: null, hrv: null, spo2: null, stress: null },
+  { id: 'GW-0063', model: 'Galaxy Watch 6 (44mm)', status: 'online', battery: 93, participant: 'P-028 · Ana L.', study: 'EST-2024-C', lastSync: '2026-04-23 08:41', hr: 65, hrv: 52, spo2: 99, stress: 18 },
+  { id: 'GW-0029', model: 'Galaxy Watch 5', status: 'online', battery: 78, participant: 'P-011 · Diego V.', study: 'EST-2024-B', lastSync: '2026-04-23 08:38', hr: 72, hrv: 45, spo2: 98, stress: 33 },
+  { id: 'GW-0044', model: 'Galaxy Watch 6 (40mm)', status: 'offline', battery: 0, participant: 'P-019 · Sofia R.', study: 'EST-2024-C', lastSync: '2026-04-21 14:55', hr: null, hrv: null, spo2: null, stress: null },
+  { id: 'GW-0071', model: 'Galaxy Watch 6 (44mm)', status: 'syncing', battery: 55, participant: 'P-033 · Marco F.', study: 'EST-2024-A', lastSync: '2026-04-23 08:44', hr: 77, hrv: 38, spo2: 97, stress: 51 },
+  { id: 'GW-0012', model: 'Galaxy Watch 4', status: 'online', battery: 66, participant: 'P-006 · Julia H.', study: 'EST-2024-B', lastSync: '2026-04-23 08:40', hr: 70, hrv: 43, spo2: 98, stress: 26 },
+  { id: 'GW-0058', model: 'Galaxy Watch 5 Pro', status: 'online', battery: 82, participant: 'P-025 · Pedro N.', study: 'EST-2024-C', lastSync: '2026-04-23 08:37', hr: 63, hrv: 58, spo2: 99, stress: 15 },
 ]
 
 const PARTICIPANTS: Participant[] = [
-  { id: 'P-003', name: 'Bruno K.',  age: 34, study: 'EST-2024-A', device: 'GW-0017', enrolled: '2026-01-10', status: 'ativo' },
-  { id: 'P-006', name: 'Julia H.',  age: 28, study: 'EST-2024-B', device: 'GW-0012', enrolled: '2026-01-15', status: 'ativo' },
+  { id: 'P-003', name: 'Bruno K.', age: 34, study: 'EST-2024-A', device: 'GW-0017', enrolled: '2026-01-10', status: 'ativo' },
+  { id: 'P-006', name: 'Julia H.', age: 28, study: 'EST-2024-B', device: 'GW-0012', enrolled: '2026-01-15', status: 'ativo' },
   { id: 'P-009', name: 'Rafael S.', age: 41, study: 'EST-2024-A', device: 'GW-0038', enrolled: '2025-12-05', status: 'ativo' },
-  { id: 'P-011', name: 'Diego V.',  age: 29, study: 'EST-2024-B', device: 'GW-0029', enrolled: '2026-02-01', status: 'ativo' },
-  { id: 'P-014', name: 'Carla M.',  age: 36, study: 'EST-2024-A', device: 'GW-0041', enrolled: '2025-11-20', status: 'ativo' },
-  { id: 'P-019', name: 'Sofia R.',  age: 31, study: 'EST-2024-C', device: 'GW-0044', enrolled: '2026-03-08', status: 'pausado' },
-  { id: 'P-021', name: 'Ines P.',   age: 45, study: 'EST-2024-B', device: 'GW-0052', enrolled: '2026-01-22', status: 'ativo' },
-  { id: 'P-025', name: 'Pedro N.',  age: 38, study: 'EST-2024-C', device: 'GW-0058', enrolled: '2026-03-01', status: 'ativo' },
-  { id: 'P-028', name: 'Ana L.',    age: 26, study: 'EST-2024-C', device: 'GW-0063', enrolled: '2026-02-18', status: 'ativo' },
-  { id: 'P-033', name: 'Marco F.',  age: 52, study: 'EST-2024-A', device: 'GW-0071', enrolled: '2025-10-30', status: 'ativo' },
+  { id: 'P-011', name: 'Diego V.', age: 29, study: 'EST-2024-B', device: 'GW-0029', enrolled: '2026-02-01', status: 'ativo' },
+  { id: 'P-014', name: 'Carla M.', age: 36, study: 'EST-2024-A', device: 'GW-0041', enrolled: '2025-11-20', status: 'ativo' },
+  { id: 'P-019', name: 'Sofia R.', age: 31, study: 'EST-2024-C', device: 'GW-0044', enrolled: '2026-03-08', status: 'pausado' },
+  { id: 'P-021', name: 'Ines P.', age: 45, study: 'EST-2024-B', device: 'GW-0052', enrolled: '2026-01-22', status: 'ativo' },
+  { id: 'P-025', name: 'Pedro N.', age: 38, study: 'EST-2024-C', device: 'GW-0058', enrolled: '2026-03-01', status: 'ativo' },
+  { id: 'P-028', name: 'Ana L.', age: 26, study: 'EST-2024-C', device: 'GW-0063', enrolled: '2026-02-18', status: 'ativo' },
+  { id: 'P-033', name: 'Marco F.', age: 52, study: 'EST-2024-A', device: 'GW-0071', enrolled: '2025-10-30', status: 'ativo' },
 ]
 
 const STUDIES: Study[] = [
-  { id: 'EST-2024-A', title: 'Estresse Crônico & HRV Longitudinal',  pi: 'Dr. Martins',    devices: 4, participants: 4, progress: 68,  status: 'ativo' },
-  { id: 'EST-2024-B', title: 'SpO₂ e Atividade Física Moderada',     pi: 'Dr. Almeida',   devices: 3, participants: 3, progress: 41,  status: 'ativo' },
-  { id: 'EST-2024-C', title: 'Biomarcadores & Ciclo Circadiano',      pi: 'Dra. Ferreira', devices: 3, participants: 3, progress: 22,  status: 'ativo' },
-  { id: 'EST-2023-Z', title: 'HRV em Ambientes de Alta Demanda',      pi: 'Dr. Costa',     devices: 0, participants: 8, progress: 100, status: 'concluído' },
+  { id: 'EST-2024-A', title: 'Estresse Crônico & HRV Longitudinal', pi: 'Dr. Martins', devices: 4, participants: 4, progress: 68, status: 'ativo' },
+  { id: 'EST-2024-B', title: 'SpO₂ e Atividade Física Moderada', pi: 'Dr. Almeida', devices: 3, participants: 3, progress: 41, status: 'ativo' },
+  { id: 'EST-2024-C', title: 'Biomarcadores & Ciclo Circadiano', pi: 'Dra. Ferreira', devices: 3, participants: 3, progress: 22, status: 'ativo' },
+  { id: 'EST-2023-Z', title: 'HRV em Ambientes de Alta Demanda', pi: 'Dr. Costa', devices: 0, participants: 8, progress: 100, status: 'concluído' },
 ]
 
 // ── Nav config ─────────────────────────────────────────────────────────────────
 type NavId = 'devices' | 'participants' | 'studies' | 'analytics' | 'settings'
 
 const NAV = [
-  { id: 'devices'      as NavId, label: 'Dispositivos',  Icon: Watch,    badge: '10' },
-  { id: 'participants' as NavId, label: 'Participantes', Icon: Users,    badge: '10' },
-  { id: 'studies'      as NavId, label: 'Estudos',       Icon: BookOpen, badge: '4'  },
-  { id: 'analytics'   as NavId, label: 'Analytics',     Icon: BarChart3, badge: null },
+  { id: 'devices' as NavId, label: 'Dispositivos', Icon: Watch, badge: '10' },
+  { id: 'participants' as NavId, label: 'Participantes', Icon: Users, badge: '10' },
+  { id: 'studies' as NavId, label: 'Estudos', Icon: BookOpen, badge: '4' },
+  { id: 'analytics' as NavId, label: 'Analytics', Icon: BarChart3, badge: null },
 ]
 
 const PAGE_META: Record<NavId, { title: string; sub: string; tabs: { id: string; label: string }[] }> = {
-  devices:      { title: 'Dispositivos',  sub: 'Gerenciar smartwatches conectados e monitorar métricas ao vivo', tabs: [{ id: 'all', label: 'Dispositivos' }, { id: 'alerts', label: 'Alertas' }, { id: 'log', label: 'Log de eventos' }] },
-  participants: { title: 'Participantes', sub: 'Cadastro e gerenciamento de participantes dos estudos',          tabs: [{ id: 'all', label: 'Participantes' }, { id: 'consent', label: 'TCLEs' }] },
-  studies:      { title: 'Estudos',       sub: 'Protocolos de pesquisa ativos e histórico',                      tabs: [{ id: 'all', label: 'Estudos' }, { id: 'protocols', label: 'Protocolos' }] },
-  analytics:    { title: 'Analytics',     sub: 'Visualizações e relatórios consolidados',                        tabs: [{ id: 'all', label: 'Visão geral' }] },
-  settings:     { title: 'Configurações', sub: 'Configurações do sistema',                                        tabs: [{ id: 'all', label: 'Geral' }] },
+  devices: { title: 'Dispositivos', sub: 'Gerenciar smartwatches conectados e monitorar métricas ao vivo', tabs: [{ id: 'all', label: 'Dispositivos' }, { id: 'alerts', label: 'Alertas' }, { id: 'log', label: 'Log de eventos' }] },
+  participants: { title: 'Participantes', sub: 'Cadastro e gerenciamento de participantes dos estudos', tabs: [{ id: 'all', label: 'Participantes' }, { id: 'consent', label: 'TCLEs' }] },
+  studies: { title: 'Estudos', sub: 'Protocolos de pesquisa ativos e histórico', tabs: [{ id: 'all', label: 'Estudos' }, { id: 'protocols', label: 'Protocolos' }] },
+  analytics: { title: 'Analytics', sub: 'Visualizações e relatórios consolidados', tabs: [{ id: 'all', label: 'Visão geral' }] },
+  settings: { title: 'Configurações', sub: 'Configurações do sistema', tabs: [{ id: 'all', label: 'Geral' }] },
 }
 
 const TAB_COUNTS: Record<string, string> = { devices: '10', participants: '10', studies: '4' }
@@ -117,7 +118,7 @@ function Btn({
     transition: 'opacity 0.15s, background 0.15s, border-color 0.15s, color 0.15s',
   }
   let extra: React.CSSProperties
-  if (variant === 'teal')    extra = { background: C.teal, color: C.navy, opacity: hov ? 0.88 : 1 }
+  if (variant === 'teal') extra = { background: C.teal, color: C.navy, opacity: hov ? 0.88 : 1 }
   else if (variant === 'outline') extra = { background: 'transparent', border: `1px solid ${hov ? C.textSec : C.divider}`, color: hov ? C.text : C.textSec }
   else extra = { background: hov ? C.navyMid : 'transparent', color: hov ? C.text : C.textSec, padding: '7px 10px' }
   return (
@@ -149,12 +150,12 @@ function IconBtn({ children, danger, title, onClick }: { children: React.ReactNo
 
 function StatusPill({ status }: { status: string }) {
   const cfg: Record<string, { bg: string; color: string; label: string; dotClass?: string }> = {
-    online:     { bg: 'rgba(0,191,165,0.10)',  color: C.teal,  label: 'Online',        dotClass: 'admin-dot-online'  },
-    offline:    { bg: 'rgba(224,92,92,0.10)',  color: C.red,   label: 'Offline'                                      },
-    syncing:    { bg: 'rgba(212,160,23,0.10)', color: C.amber, label: 'Sincronizando',  dotClass: 'admin-dot-syncing' },
-    ativo:      { bg: 'rgba(0,191,165,0.10)',  color: C.teal,  label: 'Ativo',          dotClass: 'admin-dot-online'  },
-    pausado:    { bg: 'rgba(212,160,23,0.10)', color: C.amber, label: 'Pausado'                                       },
-    concluído:  { bg: 'rgba(224,92,92,0.10)',  color: C.red,   label: 'Concluído'                                     },
+    online: { bg: 'rgba(0,191,165,0.10)', color: C.teal, label: 'Online', dotClass: 'admin-dot-online' },
+    offline: { bg: 'rgba(224,92,92,0.10)', color: C.red, label: 'Offline' },
+    syncing: { bg: 'rgba(212,160,23,0.10)', color: C.amber, label: 'Sincronizando', dotClass: 'admin-dot-syncing' },
+    ativo: { bg: 'rgba(0,191,165,0.10)', color: C.teal, label: 'Ativo', dotClass: 'admin-dot-online' },
+    pausado: { bg: 'rgba(212,160,23,0.10)', color: C.amber, label: 'Pausado' },
+    concluído: { bg: 'rgba(224,92,92,0.10)', color: C.red, label: 'Concluído' },
   }
   const c = cfg[status] ?? { bg: C.navyMid, color: C.textSec, label: status }
   return (
@@ -228,7 +229,7 @@ function Sparkline({ vals, color = C.teal, h = 48 }: { vals: number[]; color?: s
 
 function DeviceDrawer({ device, onClose }: { device: Device | null; onClose: () => void }) {
   if (!device) return null
-  const hrSpark = device.hr   ? [device.hr  - 8, device.hr  - 4, device.hr  + 2, device.hr  - 1, device.hr  + 5, device.hr,  device.hr  - 2] : null
+  const hrSpark = device.hr ? [device.hr - 8, device.hr - 4, device.hr + 2, device.hr - 1, device.hr + 5, device.hr, device.hr - 2] : null
   const hrvSpark = device.hrv ? [device.hrv - 12, device.hrv - 5, device.hrv + 3, device.hrv - 2, device.hrv + 7, device.hrv, device.hrv - 4] : null
 
   const sec: React.CSSProperties = { padding: '16px 24px', borderBottom: `1px solid ${C.divider}` }
@@ -239,8 +240,8 @@ function DeviceDrawer({ device, onClose }: { device: Device | null; onClose: () 
 
   const drawerBtns = [
     { label: 'Forçar sincronização', v: 'primary' },
-    { label: 'Exportar dados',       v: 'secondary' },
-    { label: 'Editar vínculo',       v: 'secondary' },
+    { label: 'Exportar dados', v: 'secondary' },
+    { label: 'Editar vínculo', v: 'secondary' },
     { label: 'Desvincular dispositivo', v: 'danger' },
   ] as const
 
@@ -273,9 +274,9 @@ function DeviceDrawer({ device, onClose }: { device: Device | null; onClose: () 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {[
               ['Participante', device.participant],
-              ['Estudo',       device.study],
-              ['Último sync',  device.lastSync?.split(' ')[1] ?? '—'],
-              ['Data',         device.lastSync?.split(' ')[0] ?? '—'],
+              ['Estudo', device.study],
+              ['Último sync', device.lastSync?.split(' ')[1] ?? '—'],
+              ['Data', device.lastSync?.split(' ')[0] ?? '—'],
             ].map(([label, val]) => (
               <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <span style={{ fontSize: '0.65rem', color: C.textSec, letterSpacing: '0.06em' }}>{label}</span>
@@ -289,10 +290,10 @@ function DeviceDrawer({ device, onClose }: { device: Device | null; onClose: () 
           <div style={secLabel}>Métricas ao vivo</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
             {[
-              { label: 'FC',         val: device.hr     ? `${device.hr} bpm`   : '—', color: device.hr ? C.teal : C.text },
-              { label: 'HRV (RMSSD)',val: device.hrv    ? `${device.hrv} ms`   : '—', color: C.text },
-              { label: 'SpO₂',       val: device.spo2   ? `${device.spo2}%`    : '—', color: C.text },
-              { label: 'Estresse',   val: device.stress != null ? `${device.stress}/100` : '—', color: C.text },
+              { label: 'FC', val: device.hr ? `${device.hr} bpm` : '—', color: device.hr ? C.teal : C.text },
+              { label: 'HRV (RMSSD)', val: device.hrv ? `${device.hrv} ms` : '—', color: C.text },
+              { label: 'SpO₂', val: device.spo2 ? `${device.spo2}%` : '—', color: C.text },
+              { label: 'Estresse', val: device.stress != null ? `${device.stress}/100` : '—', color: C.text },
             ].map(({ label, val, color }) => (
               <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <span style={{ fontSize: '0.65rem', color: C.textSec }}>{label}</span>
@@ -317,9 +318,9 @@ function DeviceDrawer({ device, onClose }: { device: Device | null; onClose: () 
         <div style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {drawerBtns.map(({ label, v }) => {
             const s: React.CSSProperties =
-              v === 'primary'   ? { background: C.teal, color: C.navy, border: 'none' }
-              : v === 'danger'  ? { background: 'transparent', border: `1px solid rgba(224,92,92,0.3)`, color: C.red }
-              : { background: 'transparent', border: `1px solid ${C.divider}`, color: C.textSec }
+              v === 'primary' ? { background: C.teal, color: C.navy, border: 'none' }
+                : v === 'danger' ? { background: 'transparent', border: `1px solid rgba(224,92,92,0.3)`, color: C.red }
+                  : { background: 'transparent', border: `1px solid ${C.divider}`, color: C.textSec }
             return (
               <button key={label} style={{
                 width: '100%', padding: '9px', textAlign: 'center', cursor: 'pointer',
@@ -338,11 +339,11 @@ function DeviceDrawer({ device, onClose }: { device: Device | null; onClose: () 
 // ── Devices tab ────────────────────────────────────────────────────────────────
 
 function DevicesTab({ density }: { density: 'normal' | 'compact' }) {
-  const [query, setQuery]           = useState('')
-  const [statusFilter, setFilter]   = useState('todos')
-  const [sortCol, setSortCol]       = useState<keyof Device>('id')
-  const [sortAsc, setSortAsc]       = useState(true)
-  const [selected, setSelected]     = useState<Device | null>(null)
+  const [query, setQuery] = useState('')
+  const [statusFilter, setFilter] = useState('todos')
+  const [sortCol, setSortCol] = useState<keyof Device>('id')
+  const [sortAsc, setSortAsc] = useState(true)
+  const [selected, setSelected] = useState<Device | null>(null)
 
   const rp = density === 'compact' ? '7px 10px' : '11px 10px'
 
@@ -380,10 +381,10 @@ function DevicesTab({ density }: { density: 'normal' | 'compact' }) {
       {/* Summary row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: C.divider, borderBottom: `1px solid ${C.divider}`, flexShrink: 0 }}>
         {[
-          { label: 'Dispositivos online', val: onlineDevices.length,                          valCol: C.teal,  delta: `↑ de ${DEVICES.length} totais`,  deltaCol: C.teal    },
-          { label: 'Offline',             val: DEVICES.filter(d => d.status === 'offline').length, valCol: C.red, delta: 'Atenção',                   deltaCol: C.red     },
-          { label: 'Bateria média',        val: avgBattery,  unit: '%',   delta: 'todos os dispositivos',  deltaCol: C.teal },
-          { label: 'FC média',             val: avgHR,       unit: ' bpm',delta: 'participantes online',   deltaCol: C.teal },
+          { label: 'Dispositivos online', val: onlineDevices.length, valCol: C.teal, delta: `↑ de ${DEVICES.length} totais`, deltaCol: C.teal },
+          { label: 'Offline', val: DEVICES.filter(d => d.status === 'offline').length, valCol: C.red, delta: 'Atenção', deltaCol: C.red },
+          { label: 'Bateria média', val: avgBattery, unit: '%', delta: 'todos os dispositivos', deltaCol: C.teal },
+          { label: 'FC média', val: avgHR, unit: ' bpm', delta: 'participantes online', deltaCol: C.teal },
         ].map(({ label, val, unit, valCol, delta, deltaCol }) => (
           <div key={label} style={{ background: C.navy, padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 3 }}>
             <div style={{ fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: C.textSec }}>{label}</div>
@@ -412,7 +413,7 @@ function DevicesTab({ density }: { density: 'normal' | 'compact' }) {
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: '0.72rem', color: C.textSec }}>{filtered.length} dispositivos</span>
           <Btn variant="outline" icon={<Download size={12} />}>Exportar</Btn>
-          <Btn variant="teal"    icon={<Plus size={12} />}>Vincular</Btn>
+          <Btn variant="teal" icon={<Plus size={12} />}>Vincular</Btn>
         </div>
       </div>
 
@@ -528,7 +529,7 @@ function ParticipantsTab({ density }: { density: 'normal' | 'compact' }) {
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: '0.72rem', color: C.textSec }}>{filtered.length} participantes</span>
           <Btn variant="outline" icon={<Download size={12} />}>Exportar</Btn>
-          <Btn variant="teal"    icon={<Plus size={12} />}>Adicionar</Btn>
+          <Btn variant="teal" icon={<Plus size={12} />}>Adicionar</Btn>
         </div>
       </div>
 
@@ -588,7 +589,7 @@ function StudiesTab({ density }: { density: 'normal' | 'compact' }) {
       <div style={{ display: 'flex', alignItems: 'center', padding: '12px 28px', borderBottom: `1px solid ${C.divider}`, flexShrink: 0, background: C.navy }}>
         <div style={{ display: 'flex', gap: 6 }}>
           <Btn variant="outline" icon={<Download size={12} />}>Exportar</Btn>
-          <Btn variant="teal"    icon={<Plus size={12} />}>Novo estudo</Btn>
+          <Btn variant="teal" icon={<Plus size={12} />}>Novo estudo</Btn>
         </div>
       </div>
 
@@ -692,10 +693,7 @@ function PanelPage() {
           </div>
           <IconBtn title="Notificações"><Bell size={15} /></IconBtn>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', padding: '4px 8px' }}>
-            <div style={{ width: 24, height: 24, borderRadius: '50%', background: C.navyMid, border: `1px solid ${C.teal}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 600, color: C.teal }}>
-              DR
-            </div>
-            <span style={{ fontSize: '0.75rem', color: C.textSec }}>Dr. Martins</span>
+            <UserButton />
           </div>
         </div>
       </div>
@@ -774,15 +772,15 @@ function PanelPage() {
         </div>
 
         {/* Page content */}
-        {activeNav === 'devices'      && activeTab === 'all' ? <DevicesTab density={density} />      :
-         activeNav === 'participants' && activeTab === 'all' ? <ParticipantsTab density={density} /> :
-         activeNav === 'studies'      && activeTab === 'all' ? <StudiesTab density={density} />      :
-         (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: C.textSec, fontSize: '0.82rem' }}>
-            <BarChart3 size={32} style={{ opacity: 0.3 }} />
-            <span>Em desenvolvimento</span>
-          </div>
-         )
+        {activeNav === 'devices' && activeTab === 'all' ? <DevicesTab density={density} /> :
+          activeNav === 'participants' && activeTab === 'all' ? <ParticipantsTab density={density} /> :
+            activeNav === 'studies' && activeTab === 'all' ? <StudiesTab density={density} /> :
+              (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: C.textSec, fontSize: '0.82rem' }}>
+                  <BarChart3 size={32} style={{ opacity: 0.3 }} />
+                  <span>Em desenvolvimento</span>
+                </div>
+              )
         }
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Heart, Activity, Smile, Clock } from 'lucide-react'
-import { Route as panelRoute } from './panel/index.tsx'
+import { Route as panelRoute } from './_authenticated/panel/index.tsx'
 import Nav from '../components/landing/Nav'
 import Hero from '../components/landing/Hero'
 import SensorCard from '../components/landing/SensorCard'

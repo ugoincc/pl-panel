@@ -54,7 +54,7 @@ export default function Nav() {
       </div>
 
       <Show when="signed-out">
-        <SignInButton mode="modal">
+        <SignInButton mode='modal'>
           <button
             style={{
               background: 'transparent',
