@@ -1,8 +1,20 @@
 ## Codebase Patterns
 - shadcn uses `#/` path alias; tsconfig.json must have `"#/*": ["./src/*"]` alongside `"@/*": ["./src/*"]`
 - vite.config.ts uses `resolve: { tsconfigPaths: true }` so tsconfig path aliases are auto-used in Vite builds
-- shadcn components are in src/components/ui/ — all 12 installed: button, badge, table, card, tabs, sheet, tooltip, input, checkbox, scroll-area, separator, dropdown-menu
+- shadcn components are in src/components/ui/ — 13 installed (added select for user-panel): button, badge, table, card, tabs, sheet, tooltip, input, checkbox, scroll-area, separator, dropdown-menu, select
 - styles.css uses oklch() color space for shadcn CSS variables; match this format when adding/updating variables
+- Landing palette tokens (--foam, --sand, --lagoon, --lagoon-deep, --sea-ink, --sea-ink-soft, --palm) are mapped in @theme inline as --color-* so they are usable as Tailwind classes (bg-foam, text-lagoon, etc.)
+- `navigate({ to: '/user/' as any })` — use `as any` cast when navigating to a route that doesn't yet exist in the TS type system (e.g. created in a later story)
+
+## 2026-05-15 - US-001 through US-005 (ralph/user-panel branch)
+
+## 2026-05-15 - US-001 (ralph/user-panel)
+- What was implemented: Added 7 PulseLab color tokens to @theme inline block in src/styles.css so they can be used as Tailwind utilities (bg-foam, text-lagoon, text-sea-ink, etc.)
+- Files changed: src/styles.css (added --color-foam, --color-sand, --color-lagoon, --color-lagoon-deep, --color-sea-ink, --color-sea-ink-soft, --color-palm after --color-sidebar-ring)
+- **Learnings for future iterations:**
+  - The @theme inline block is where Tailwind color utilities are registered — add `--color-<name>: var(--<name>)` to expose any CSS variable as a Tailwind class
+  - Existing :root and .dark variable definitions are NOT changed — only @theme inline mapping is added
+---
 - PulseLab-specific variables (--sea-ink, --lagoon, --palm, --pl-navy, etc.) live alongside shadcn variables in styles.css — do NOT touch them
 - TypeScript check: use `npx tsc --noEmit` (no "typecheck" script in package.json); pre-existing Nav.tsx unused-import errors are expected and not blocking
 - Available quality scripts: `npm run lint` (biome), `npm run check` (biome), `npx tsc --noEmit` (types), `npm test` (vitest)
@@ -63,6 +75,40 @@
 - **Learnings for future iterations:**
   - Pattern is identical to DevicesTab — define a custom FilterFn, use the same Tailwind table classes
   - StudiesTab progress bar: outer `div.bg-muted.rounded-full.h-2.w-24`, inner `div.bg-primary.rounded-full.h-2` with inline style width
+---
+
+## 2026-05-15 - US-002 (ralph/user-panel)
+- What was implemented: Role-based routing guard in _authenticated.tsx — redirects non-admins away from /panel and admins away from /user; spinner shown while auth loads
+- Files changed: src/routes/_authenticated.tsx (added useUser, useNavigate, useRouterState; added useEffect redirect logic; spinner for loading state)
+- **Learnings for future iterations:**
+  - navigate({ to: '/panel/' }) fails TS type check when the route isn't yet known — use `as any` cast
+  - Both `authLoaded` from useAuth and `isLoaded` from useUser must be checked before rendering; use both guards
+---
+
+## 2026-05-15 - US-003 (ralph/user-panel)
+- What was implemented: Created /user/ route at src/routes/_authenticated/user/index.tsx with full layout shell
+- Files changed: src/routes/_authenticated/user/index.tsx (new)
+- **Learnings for future iterations:**
+  - UserButtonData component already exists at src/components/user/UserButtonData.tsx — no need to create it
+  - The bg-foam, text-lagoon, text-sea-ink Tailwind utilities work correctly (registered in US-001)
+---
+
+## 2026-05-15 - US-004 (ralph/user-panel)
+- What was implemented: DeviceCard component with device info, StatusPill, battery/sync icons, and 4 metric tiles
+- Files changed: src/components/user-panel/DeviceCard.tsx (new); src/routes/_authenticated/user/index.tsx (import + use DeviceCard)
+- **Learnings for future iterations:**
+  - StatusPill is imported from @/components/panel/StatusPill — reused from admin panel
+  - `border border-border border-l-2 border-l-lagoon` works correctly for tiles with left accent
+  - DEVICES is a named export from @api/data/mockData (not default)
+---
+
+## 2026-05-15 - US-005 (ralph/user-panel)
+- What was implemented: ExportPanel component with date range, granularity select, format buttons, and mock data download
+- Files changed: src/components/user-panel/ExportPanel.tsx (new); src/components/ui/select.tsx (new, installed via shadcn); src/routes/_authenticated/user/index.tsx (import + use ExportPanel)
+- **Learnings for future iterations:**
+  - shadcn select was NOT in the original 12 installed components — needed `printf "n\n" | npx shadcn@latest add select` to install
+  - The `as any` cast pattern for navigate is consistent with US-002 approach
+  - todayStr() helper using new Date().toISOString().slice(0, 10) is clean for date state initialization
 ---
 
 ## 2026-05-15 - US-009
