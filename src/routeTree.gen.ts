@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as AuthenticatedUserIndexRouteImport } from './routes/_authenticated/user/index'
 import { Route as AuthenticatedPanelIndexRouteImport } from './routes/_authenticated/panel/index'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -28,6 +29,11 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/auth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedUserIndexRoute = AuthenticatedUserIndexRouteImport.update({
+  id: '/user/',
+  path: '/user/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPanelIndexRoute = AuthenticatedPanelIndexRouteImport.update({
   id: '/panel/',
   path: '/panel/',
@@ -38,11 +44,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/panel/': typeof AuthenticatedPanelIndexRoute
+  '/user/': typeof AuthenticatedUserIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/panel': typeof AuthenticatedPanelIndexRoute
+  '/user': typeof AuthenticatedUserIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,18 +58,20 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth/sign-in': typeof AuthSignInRoute
   '/_authenticated/panel/': typeof AuthenticatedPanelIndexRoute
+  '/_authenticated/user/': typeof AuthenticatedUserIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/sign-in' | '/panel/'
+  fullPaths: '/' | '/auth/sign-in' | '/panel/' | '/user/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/sign-in' | '/panel'
+  to: '/' | '/auth/sign-in' | '/panel' | '/user'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth/sign-in'
     | '/_authenticated/panel/'
+    | '/_authenticated/user/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +103,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/user/': {
+      id: '/_authenticated/user/'
+      path: '/user'
+      fullPath: '/user/'
+      preLoaderRoute: typeof AuthenticatedUserIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/panel/': {
       id: '/_authenticated/panel/'
       path: '/panel'
@@ -105,10 +122,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedPanelIndexRoute: typeof AuthenticatedPanelIndexRoute
+  AuthenticatedUserIndexRoute: typeof AuthenticatedUserIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPanelIndexRoute: AuthenticatedPanelIndexRoute,
+  AuthenticatedUserIndexRoute: AuthenticatedUserIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
