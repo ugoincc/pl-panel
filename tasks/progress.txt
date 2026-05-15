@@ -1,4 +1,7 @@
 ## Codebase Patterns
+- shadcn uses `#/` path alias; tsconfig.json must have `"#/*": ["./src/*"]` alongside `"@/*": ["./src/*"]`
+- vite.config.ts uses `resolve: { tsconfigPaths: true }` so tsconfig path aliases are auto-used in Vite builds
+- shadcn components are in src/components/ui/ — all 12 installed: button, badge, table, card, tabs, sheet, tooltip, input, checkbox, scroll-area, separator, dropdown-menu
 - styles.css uses oklch() color space for shadcn CSS variables; match this format when adding/updating variables
 - PulseLab-specific variables (--sea-ink, --lagoon, --palm, --pl-navy, etc.) live alongside shadcn variables in styles.css — do NOT touch them
 - TypeScript check: use `npx tsc --noEmit` (no "typecheck" script in package.json); pre-existing Nav.tsx unused-import errors are expected and not blocking
@@ -16,4 +19,13 @@
   - Pre-existing TS errors in Nav.tsx (unused imports) are not blocking — they exist on main and are unrelated to panel refactor
   - The `.dark` block also has sidebar variables that should remain unchanged
   - All PulseLab custom variables (--sea-ink, --lagoon, --palm, etc.) were left untouched as required
+---
+
+## 2026-05-15 - US-002
+- What was implemented: Installed @tanstack/react-table, added 12 shadcn components, added `#/*` tsconfig path alias
+- Files changed: package.json, package-lock.json, tsconfig.json, src/components/ui/ (12 new files)
+- **Learnings for future iterations:**
+  - The `#/*` alias was missing from tsconfig.json — shadcn components reference `#/lib/utils.ts` and `#/components/ui/`, so this alias is required
+  - shadcn CLI `--no-overwrite` flag doesn't exist; use `printf "n\n" | npx shadcn@latest add ...` to say no to overwrite prompts
+  - components.json already existed (style: new-york, cssVariables: true, tailwind.css: src/styles.css)
 ---
