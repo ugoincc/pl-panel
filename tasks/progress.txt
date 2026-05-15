@@ -29,3 +29,49 @@
   - shadcn CLI `--no-overwrite` flag doesn't exist; use `printf "n\n" | npx shadcn@latest add ...` to say no to overwrite prompts
   - components.json already existed (style: new-york, cssVariables: true, tailwind.css: src/styles.css)
 ---
+
+## 2026-05-15 - US-003
+- What was implemented: Extracted StatusPill, BatteryCell, Sparkline to src/components/panel/
+- Files changed: src/components/panel/StatusPill.tsx, BatteryCell.tsx, Sparkline.tsx (new); src/routes/_authenticated/panel/index.tsx (removed inline definitions, added imports)
+- **Learnings for future iterations:**
+  - Use `bg-current` / `currentColor` for dot glow in StatusPill — inherits the text color from parent
+  - Sparkline default color changed from #00BFA5 to `var(--primary)` for CSS variable inheritance
+  - Dynamic widths (e.g., battery %) need inline `style={{ width: `${pct}%` }}` — static Tailwind can't do this
+---
+
+## 2026-05-15 - US-004
+- What was implemented: Extracted DeviceDrawer using shadcn Sheet with props { device, open, onClose }
+- Files changed: src/components/panel/DeviceDrawer.tsx (new); src/routes/_authenticated/panel/index.tsx (removed old drawer, added DeviceDrawer import with open prop)
+- **Learnings for future iterations:**
+  - shadcn Sheet renders via Radix portal outside the DOM tree — must add `dark` class to SheetContent so dark CSS variables apply
+  - SheetContent has `showCloseButton={false}` option to suppress the built-in X button when you have custom header layout
+  - The Sheet `open` + `onOpenChange` pattern is cleaner than the old `device !== null` conditional render
+---
+
+## 2026-05-15 - US-005, US-006
+- What was implemented: DevicesTab with TanStack Table (basic + sorting + global filter)
+- Files changed: src/components/panel/DevicesTab.tsx (new)
+- **Learnings for future iterations:**
+  - Custom globalFilterFn lets you specify which columns to search (device ID, participant, study)
+  - `key={activeNav}` on Tabs component resets tab state when navigating between sections
+  - TanStack Table v8 imports: createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel from '@tanstack/react-table'
+---
+
+## 2026-05-15 - US-007, US-008
+- What was implemented: ParticipantsTab and StudiesTab with TanStack Table (sorting + global filter)
+- Files changed: src/components/panel/ParticipantsTab.tsx, StudiesTab.tsx (new)
+- **Learnings for future iterations:**
+  - Pattern is identical to DevicesTab — define a custom FilterFn, use the same Tailwind table classes
+  - StudiesTab progress bar: outer `div.bg-muted.rounded-full.h-2.w-24`, inner `div.bg-primary.rounded-full.h-2` with inline style width
+---
+
+## 2026-05-15 - US-009
+- What was implemented: Rewrote panel/index.tsx as slim 198-line orchestrator
+- Files changed: src/routes/_authenticated/panel/index.tsx (complete rewrite)
+- **Learnings for future iterations:**
+  - Root panel div needs BOTH `pl-dark` (for PulseLab vars) AND `dark` (for shadcn vars) classes
+  - Tailwind arbitrary grid: `grid-cols-[220px_1fr] grid-rows-[48px_1fr]` replaces inline grid styles
+  - shadcn Tabs with `key={activeNav}` automatically resets to defaultValue when nav changes
+  - cn() for active sidebar state: `activeNav === id ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-transparent text-muted-foreground hover:bg-muted'`
+  - Analytics placeholder uses shadcn Card component with CardContent
+---
