@@ -1,1511 +1,198 @@
-import { useState, useMemo } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 import {
-  Watch,
-  Users,
-  BookOpen,
   BarChart3,
-  Settings,
-  LogOut,
-  Search,
-  Download,
-  Plus,
-  Eye,
-  RefreshCw,
-  Trash2,
   Bell,
-  Pencil,
-} from 'lucide-react';
-import { UserButtonData } from '@/components/user/UserButtonData';
-import type { Device } from '@types';
-import { DEVICES, PARTICIPANTS, STUDIES } from '@api/data/mockData';
-import { StatusPill } from '@/components/panel/StatusPill';
-import { BatteryCell } from '@/components/panel/BatteryCell';
-import { DeviceDrawer } from '@/components/panel/DeviceDrawer';
+  BookOpen,
+  Download,
+  LogOut,
+  Plus,
+  Settings,
+  Users,
+  Watch,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { UserButtonData } from '@/components/user/UserButtonData'
+import type { Device } from '@types'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DeviceDrawer } from '@/components/panel/DeviceDrawer'
+import { DevicesTab } from '@/components/panel/DevicesTab'
+import { ParticipantsTab } from '@/components/panel/ParticipantsTab'
+import { StudiesTab } from '@/components/panel/StudiesTab'
+
 export const Route = createFileRoute('/_authenticated/panel/')({
   component: PanelPage,
-});
+})
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const C = {
-  navy: '#0A1628',
-  navyLight: '#152238',
-  navyMid: '#1E3048',
-  navyHover: '#1a2d47',
-  teal: '#00BFA5',
-  tealDim: 'rgba(0,191,165,0.10)',
-  tealGlow: 'rgba(0,191,165,0.30)',
-  text: '#F0F4F8',
-  textSec: '#8A9BB0',
-  divider: '#1E3048',
-  red: '#E05C5C',
-  amber: '#D4A017',
-} as const;
-
-// ── Nav config ─────────────────────────────────────────────────────────────────
-type NavId = 'devices' | 'participants' | 'studies' | 'analytics' | 'settings';
+type NavId = 'devices' | 'participants' | 'studies' | 'analytics'
 
 const NAV = [
   { id: 'devices' as NavId, label: 'Dispositivos', Icon: Watch, badge: '10' },
-  {
-    id: 'participants' as NavId,
-    label: 'Participantes',
-    Icon: Users,
-    badge: '10',
-  },
+  { id: 'participants' as NavId, label: 'Participantes', Icon: Users, badge: '10' },
   { id: 'studies' as NavId, label: 'Estudos', Icon: BookOpen, badge: '4' },
-  {
-    id: 'analytics' as NavId,
-    label: 'Analytics',
-    Icon: BarChart3,
-    badge: null,
-  },
-];
+  { id: 'analytics' as NavId, label: 'Analytics', Icon: BarChart3, badge: null },
+]
 
 const PAGE_META: Record<
   NavId,
-  { title: string; sub: string; tabs: { id: string; label: string }[] }
+  { title: string; sub: string; tabs: [string, string][] }
 > = {
   devices: {
     title: 'Dispositivos',
     sub: 'Gerenciar smartwatches conectados e monitorar métricas ao vivo',
-    tabs: [
-      { id: 'all', label: 'Dispositivos' },
-      { id: 'alerts', label: 'Alertas' },
-      { id: 'log', label: 'Log de eventos' },
-    ],
+    tabs: [['all', 'Dispositivos'], ['alerts', 'Alertas'], ['log', 'Log de eventos']],
   },
   participants: {
     title: 'Participantes',
     sub: 'Cadastro e gerenciamento de participantes dos estudos',
-    tabs: [
-      { id: 'all', label: 'Participantes' },
-      { id: 'consent', label: 'TCLEs' },
-    ],
+    tabs: [['all', 'Participantes'], ['consent', 'TCLEs']],
   },
   studies: {
     title: 'Estudos',
     sub: 'Protocolos de pesquisa ativos e histórico',
-    tabs: [
-      { id: 'all', label: 'Estudos' },
-      { id: 'protocols', label: 'Protocolos' },
-    ],
+    tabs: [['all', 'Estudos'], ['protocols', 'Protocolos']],
   },
   analytics: {
     title: 'Analytics',
     sub: 'Visualizações e relatórios consolidados',
-    tabs: [{ id: 'all', label: 'Visão geral' }],
+    tabs: [['all', 'Visão geral']],
   },
-  settings: {
-    title: 'Configurações',
-    sub: 'Configurações do sistema',
-    tabs: [{ id: 'all', label: 'Geral' }],
-  },
-};
-
-const TAB_COUNTS: Record<string, string> = {
-  devices: '10',
-  participants: '10',
-  studies: '4',
-};
-
-// ── Shared primitives ──────────────────────────────────────────────────────────
-
-function Btn({
-  variant,
-  icon,
-  children,
-  onClick,
-}: {
-  variant: 'teal' | 'outline' | 'ghost';
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  onClick?: () => void;
-}) {
-  const [hov, setHov] = useState(false);
-  const base: React.CSSProperties = {
-    fontFamily: '"Space Grotesk", sans-serif',
-    fontSize: '0.72rem',
-    fontWeight: 500,
-    letterSpacing: '0.06em',
-    padding: '7px 16px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    border: 'none',
-    transition:
-      'opacity 0.15s, background 0.15s, border-color 0.15s, color 0.15s',
-  };
-  let extra: React.CSSProperties;
-  if (variant === 'teal')
-    extra = { background: C.teal, color: C.navy, opacity: hov ? 0.88 : 1 };
-  else if (variant === 'outline')
-    extra = {
-      background: 'transparent',
-      border: `1px solid ${hov ? C.textSec : C.divider}`,
-      color: hov ? C.text : C.textSec,
-    };
-  else
-    extra = {
-      background: hov ? C.navyMid : 'transparent',
-      color: hov ? C.text : C.textSec,
-      padding: '7px 10px',
-    };
-  return (
-    <button
-      style={{ ...base, ...extra }}
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-    >
-      {icon}
-      {children}
-    </button>
-  );
 }
-
-function IconBtn({
-  children,
-  danger,
-  title,
-  onClick,
-}: {
-  children: React.ReactNode;
-  danger?: boolean;
-  title?: string;
-  onClick?: () => void;
-}) {
-  const [hov, setHov] = useState(false);
-  return (
-    <button
-      title={title}
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        padding: '4px 6px',
-        cursor: 'pointer',
-        transition: 'all 0.15s',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: hov ? C.navyMid : 'transparent',
-        border: `1px solid ${hov ? (danger ? C.red : C.divider) : 'transparent'}`,
-        color: hov ? (danger ? C.red : C.text) : C.textSec,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-// ── Cell components ────────────────────────────────────────────────────────────
-
-function HRVSpark({ vals }: { vals: number[] | null }) {
-  if (!vals)
-    return <span style={{ color: C.textSec, fontSize: '0.7rem' }}>—</span>;
-  const max = Math.max(...vals);
-  return (
-    <div
-      style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 18 }}
-    >
-      {vals.map((v, i) => (
-        <div
-          key={i}
-          style={{
-            width: 3,
-            height: Math.round((v / max) * 18),
-            background: C.teal,
-            borderRadius: 1,
-            opacity: 0.6,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ── Devices tab ────────────────────────────────────────────────────────────────
-
-function DevicesTab({ density }: { density: 'normal' | 'compact' }) {
-  const [query, setQuery] = useState('');
-  const [statusFilter, setFilter] = useState('todos');
-  const [sortCol, setSortCol] = useState<keyof Device>('id');
-  const [sortAsc, setSortAsc] = useState(true);
-  const [selected, setSelected] = useState<Device | null>(null);
-
-  const rp = density === 'compact' ? '7px 10px' : '11px 10px';
-
-  const filtered = useMemo(() => {
-    const q = query.toLowerCase();
-    let d = DEVICES.filter(
-      (r) =>
-        (statusFilter === 'todos' || r.status === statusFilter) &&
-        (r.id.toLowerCase().includes(q) ||
-          r.participant.toLowerCase().includes(q) ||
-          r.study.toLowerCase().includes(q)),
-    );
-    d.sort((a, b) => {
-      const va = String(a[sortCol] ?? ''),
-        vb = String(b[sortCol] ?? '');
-      return sortAsc
-        ? va.localeCompare(vb, undefined, { numeric: true })
-        : vb.localeCompare(va, undefined, { numeric: true });
-    });
-    return d;
-  }, [query, statusFilter, sortCol, sortAsc]);
-
-  function toggleSort(col: keyof Device) {
-    if (sortCol === col) setSortAsc((v) => !v);
-    else {
-      setSortCol(col);
-      setSortAsc(true);
-    }
-  }
-
-  const thBase: React.CSSProperties = {
-    textAlign: 'left',
-    padding: '0 10px 10px',
-    fontSize: '0.63rem',
-    fontWeight: 600,
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-    color: C.textSec,
-    borderBottom: `1px solid ${C.divider}`,
-    whiteSpace: 'nowrap',
-    cursor: 'pointer',
-    userSelect: 'none',
-  };
-
-  const onlineDevices = DEVICES.filter((d) => d.status === 'online');
-  const avgBattery = Math.round(
-    DEVICES.reduce((s, d) => s + d.battery, 0) / DEVICES.length,
-  );
-  const avgHR = Math.round(
-    onlineDevices
-      .filter((d) => d.hr != null)
-      .reduce((s, d) => s + (d.hr ?? 0), 0) /
-      (onlineDevices.filter((d) => d.hr != null).length || 1),
-  );
-
-  return (
-    <>
-      {/* Summary row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4,1fr)',
-          gap: 1,
-          background: C.divider,
-          borderBottom: `1px solid ${C.divider}`,
-          flexShrink: 0,
-        }}
-      >
-        {[
-          {
-            label: 'Dispositivos online',
-            val: onlineDevices.length,
-            valCol: C.teal,
-            delta: `↑ de ${DEVICES.length} totais`,
-            deltaCol: C.teal,
-          },
-          {
-            label: 'Offline',
-            val: DEVICES.filter((d) => d.status === 'offline').length,
-            valCol: C.red,
-            delta: 'Atenção',
-            deltaCol: C.red,
-          },
-          {
-            label: 'Bateria média',
-            val: avgBattery,
-            unit: '%',
-            delta: 'todos os dispositivos',
-            deltaCol: C.teal,
-          },
-          {
-            label: 'FC média',
-            val: avgHR,
-            unit: ' bpm',
-            delta: 'participantes online',
-            deltaCol: C.teal,
-          },
-        ].map(({ label, val, unit, valCol, delta, deltaCol }) => (
-          <div
-            key={label}
-            style={{
-              background: C.navy,
-              padding: '14px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 3,
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.65rem',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                color: C.textSec,
-              }}
-            >
-              {label}
-            </div>
-            <div
-              style={{
-                fontFamily: '"DM Serif Display", Georgia, serif',
-                fontSize: '1.4rem',
-                color: valCol,
-                lineHeight: 1,
-              }}
-            >
-              {val}
-              {unit && (
-                <span
-                  style={{
-                    fontSize: '0.8rem',
-                    fontFamily: '"Space Grotesk", sans-serif',
-                    color: C.textSec,
-                  }}
-                >
-                  {unit}
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: '0.65rem', color: deltaCol }}>{delta}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Toolbar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '12px 28px',
-          borderBottom: `1px solid ${C.divider}`,
-          flexShrink: 0,
-          background: C.navy,
-        }}
-      >
-        <div style={{ position: 'relative', flex: 1, maxWidth: 260 }}>
-          <Search
-            size={13}
-            style={{
-              position: 'absolute',
-              left: 9,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: C.textSec,
-              pointerEvents: 'none',
-            }}
-          />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder='Buscar por ID, participante...'
-            style={{
-              width: '100%',
-              background: C.navyLight,
-              border: `1px solid ${C.divider}`,
-              color: C.text,
-              fontFamily: '"Space Grotesk", sans-serif',
-              fontSize: '0.78rem',
-              padding: '7px 10px 7px 30px',
-              outline: 'none',
-            }}
-          />
-        </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{
-            background: C.navyLight,
-            border: `1px solid ${C.divider}`,
-            color: C.textSec,
-            fontFamily: '"Space Grotesk", sans-serif',
-            fontSize: '0.75rem',
-            padding: '7px 10px',
-            outline: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <option value='todos'>Todos os status</option>
-          <option value='online'>Online</option>
-          <option value='offline'>Offline</option>
-          <option value='syncing'>Sincronizando</option>
-        </select>
-        <div
-          style={{
-            marginLeft: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-          }}
-        >
-          <span style={{ fontSize: '0.72rem', color: C.textSec }}>
-            {filtered.length} dispositivos
-          </span>
-          <Btn variant='outline' icon={<Download size={12} />}>
-            Exportar
-          </Btn>
-          <Btn variant='teal' icon={<Plus size={12} />}>
-            Vincular
-          </Btn>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 28px 24px' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginTop: 16,
-            fontSize: '0.78rem',
-          }}
-        >
-          <thead>
-            <tr>
-              <th
-                style={{
-                  ...thBase,
-                  width: 32,
-                  paddingLeft: 0,
-                  cursor: 'default',
-                }}
-              >
-                <input
-                  type='checkbox'
-                  style={{ width: 14, height: 14, accentColor: C.teal }}
-                />
-              </th>
-              {(
-                [
-                  ['id', 'Dispositivo'],
-                  ['status', 'Status'],
-                  ['battery', 'Bateria'],
-                ] as [keyof Device, string][]
-              ).map(([col, lbl]) => (
-                <th
-                  key={col}
-                  style={{
-                    ...thBase,
-                    color: sortCol === col ? C.teal : C.textSec,
-                  }}
-                  onClick={() => toggleSort(col)}
-                >
-                  {lbl} {sortCol === col ? (sortAsc ? '↑' : '↓') : ''}
-                </th>
-              ))}
-              <th style={{ ...thBase, cursor: 'default' }}>HRV</th>
-              {(
-                [
-                  ['participant', 'Participante'],
-                  ['study', 'Estudo'],
-                  ['lastSync', 'Último Sync'],
-                ] as [keyof Device, string][]
-              ).map(([col, lbl]) => (
-                <th
-                  key={col}
-                  style={{
-                    ...thBase,
-                    color: sortCol === col ? C.teal : C.textSec,
-                  }}
-                  onClick={() => toggleSort(col)}
-                >
-                  {lbl} {sortCol === col ? (sortAsc ? '↑' : '↓') : ''}
-                </th>
-              ))}
-              <th style={{ ...thBase, cursor: 'default' }}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((d) => {
-              const spark = d.hrv
-                ? [
-                    d.hrv - 12,
-                    d.hrv - 5,
-                    d.hrv + 3,
-                    d.hrv - 2,
-                    d.hrv + 7,
-                    d.hrv,
-                  ]
-                : null;
-              const sel = selected?.id === d.id;
-              return (
-                <tr
-                  key={d.id}
-                  onClick={() =>
-                    setSelected((p) => (p?.id === d.id ? null : d))
-                  }
-                  style={{
-                    borderBottom: `1px solid ${C.divider}`,
-                    transition: 'background 0.12s',
-                    cursor: 'pointer',
-                    background: sel ? C.tealDim : 'transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!sel)
-                      (
-                        e.currentTarget as HTMLTableRowElement
-                      ).style.background = C.navyLight;
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLTableRowElement).style.background =
-                      sel ? C.tealDim : 'transparent';
-                  }}
-                >
-                  <td
-                    style={{ padding: rp, paddingLeft: 0, width: 32 }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type='checkbox'
-                      style={{ width: 14, height: 14, accentColor: C.teal }}
-                    />
-                  </td>
-                  <td style={{ padding: rp }}>
-                    <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                    >
-                      <div
-                        style={{
-                          width: 28,
-                          height: 28,
-                          border: `1px solid ${C.divider}`,
-                          borderRadius: 6,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: C.textSec,
-                          flexShrink: 0,
-                          background: C.navyMid,
-                        }}
-                      >
-                        <Watch size={13} />
-                      </div>
-                      <div>
-                        <div
-                          style={{
-                            fontWeight: 500,
-                            color: C.text,
-                            fontSize: '0.78rem',
-                          }}
-                        >
-                          {d.id}
-                        </div>
-                        <div style={{ fontSize: '0.68rem', color: C.textSec }}>
-                          {d.model}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: rp }}>
-                    <StatusPill status={d.status} />
-                  </td>
-                  <td style={{ padding: rp }}>
-                    <BatteryCell pct={d.battery} />
-                  </td>
-                  <td style={{ padding: rp }}>
-                    <HRVSpark vals={spark} />
-                  </td>
-                  <td style={{ padding: rp }}>
-                    <div
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        fontSize: '0.75rem',
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: '50%',
-                          background: C.textSec,
-                          flexShrink: 0,
-                          display: 'inline-block',
-                        }}
-                      />
-                      {d.participant}
-                    </div>
-                  </td>
-                  <td style={{ padding: rp, color: C.textSec }}>{d.study}</td>
-                  <td style={{ padding: rp }}>
-                    <div style={{ fontSize: '0.72rem', color: C.textSec }}>
-                      {d.lastSync?.split(' ')[1]}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '0.65rem',
-                        color: C.textSec,
-                        opacity: 0.6,
-                      }}
-                    >
-                      {d.lastSync?.split(' ')[0]}
-                    </div>
-                  </td>
-                  <td
-                    style={{ padding: rp }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <IconBtn
-                        title='Ver detalhes'
-                        onClick={() =>
-                          setSelected((p) => (p?.id === d.id ? null : d))
-                        }
-                      >
-                        <Eye size={13} />
-                      </IconBtn>
-                      <IconBtn title='Sincronizar'>
-                        <RefreshCw size={13} />
-                      </IconBtn>
-                      <IconBtn title='Remover' danger>
-                        <Trash2 size={13} />
-                      </IconBtn>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {filtered.length === 0 && (
-          <div
-            style={{
-              padding: 48,
-              textAlign: 'center',
-              color: C.textSec,
-              fontSize: '0.82rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <Watch size={32} style={{ opacity: 0.3 }} />
-            <span>Nenhum dispositivo encontrado</span>
-          </div>
-        )}
-      </div>
-
-      <DeviceDrawer
-        device={selected}
-        open={selected !== null}
-        onClose={() => setSelected(null)}
-      />
-    </>
-  );
-}
-
-// ── Participants tab ───────────────────────────────────────────────────────────
-
-function ParticipantsTab({ density }: { density: 'normal' | 'compact' }) {
-  const [query, setQuery] = useState('');
-  const rp = density === 'compact' ? '7px 10px' : '11px 10px';
-
-  const filtered = PARTICIPANTS.filter((p) => {
-    const q = query.toLowerCase();
-    return (
-      p.id.toLowerCase().includes(q) ||
-      p.name.toLowerCase().includes(q) ||
-      p.study.toLowerCase().includes(q)
-    );
-  });
-
-  const thBase: React.CSSProperties = {
-    textAlign: 'left',
-    padding: '0 10px 10px',
-    fontSize: '0.63rem',
-    fontWeight: 600,
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-    color: C.textSec,
-    borderBottom: `1px solid ${C.divider}`,
-    whiteSpace: 'nowrap',
-    userSelect: 'none',
-  };
-
-  return (
-    <>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '12px 28px',
-          borderBottom: `1px solid ${C.divider}`,
-          flexShrink: 0,
-          background: C.navy,
-        }}
-      >
-        <div style={{ position: 'relative', flex: 1, maxWidth: 260 }}>
-          <Search
-            size={13}
-            style={{
-              position: 'absolute',
-              left: 9,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: C.textSec,
-              pointerEvents: 'none',
-            }}
-          />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder='Buscar participante...'
-            style={{
-              width: '100%',
-              background: C.navyLight,
-              border: `1px solid ${C.divider}`,
-              color: C.text,
-              fontFamily: '"Space Grotesk", sans-serif',
-              fontSize: '0.78rem',
-              padding: '7px 10px 7px 30px',
-              outline: 'none',
-            }}
-          />
-        </div>
-        <div
-          style={{
-            marginLeft: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-          }}
-        >
-          <span style={{ fontSize: '0.72rem', color: C.textSec }}>
-            {filtered.length} participantes
-          </span>
-          <Btn variant='outline' icon={<Download size={12} />}>
-            Exportar
-          </Btn>
-          <Btn variant='teal' icon={<Plus size={12} />}>
-            Adicionar
-          </Btn>
-        </div>
-      </div>
-
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 28px 24px' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginTop: 16,
-            fontSize: '0.78rem',
-          }}
-        >
-          <thead>
-            <tr>
-              <th style={{ ...thBase, width: 32, paddingLeft: 0 }}>
-                <input
-                  type='checkbox'
-                  style={{ width: 14, height: 14, accentColor: C.teal }}
-                />
-              </th>
-              {[
-                'ID',
-                'Nome',
-                'Idade',
-                'Estudo',
-                'Dispositivo',
-                'Ingresso',
-                'Status',
-                'Ações',
-              ].map((h) => (
-                <th key={h} style={thBase}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((p) => (
-              <tr
-                key={p.id}
-                style={{
-                  borderBottom: `1px solid ${C.divider}`,
-                  transition: 'background 0.12s',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLTableRowElement).style.background =
-                    C.navyLight)
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLTableRowElement).style.background =
-                    'transparent')
-                }
-              >
-                <td style={{ padding: rp, paddingLeft: 0, width: 32 }}>
-                  <input
-                    type='checkbox'
-                    style={{ width: 14, height: 14, accentColor: C.teal }}
-                  />
-                </td>
-                <td
-                  style={{
-                    padding: rp,
-                    color: C.teal,
-                    fontWeight: 500,
-                    fontFamily: 'monospace',
-                    fontSize: '0.8rem',
-                  }}
-                >
-                  {p.id}
-                </td>
-                <td style={{ padding: rp, fontWeight: 500 }}>{p.name}</td>
-                <td style={{ padding: rp, color: C.textSec }}>{p.age} anos</td>
-                <td style={{ padding: rp, color: C.textSec }}>{p.study}</td>
-                <td style={{ padding: rp }}>
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      background: C.navyMid,
-                      padding: '2px 8px',
-                      color: C.textSec,
-                    }}
-                  >
-                    {p.device}
-                  </span>
-                </td>
-                <td
-                  style={{ padding: rp, color: C.textSec, fontSize: '0.75rem' }}
-                >
-                  {p.enrolled}
-                </td>
-                <td style={{ padding: rp }}>
-                  <StatusPill status={p.status} />
-                </td>
-                <td style={{ padding: rp }}>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    <IconBtn title='Ver'>
-                      <Eye size={13} />
-                    </IconBtn>
-                    <IconBtn title='Editar'>
-                      <Pencil size={13} />
-                    </IconBtn>
-                    <IconBtn title='Remover' danger>
-                      <Trash2 size={13} />
-                    </IconBtn>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
-
-// ── Studies tab ────────────────────────────────────────────────────────────────
-
-function StudiesTab({ density }: { density: 'normal' | 'compact' }) {
-  const rp = density === 'compact' ? '7px 10px' : '11px 10px';
-  const thBase: React.CSSProperties = {
-    textAlign: 'left',
-    padding: '0 10px 10px',
-    fontSize: '0.63rem',
-    fontWeight: 600,
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-    color: C.textSec,
-    borderBottom: `1px solid ${C.divider}`,
-    whiteSpace: 'nowrap',
-    userSelect: 'none',
-  };
-  return (
-    <>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '12px 28px',
-          borderBottom: `1px solid ${C.divider}`,
-          flexShrink: 0,
-          background: C.navy,
-        }}
-      >
-        <div style={{ display: 'flex', gap: 6 }}>
-          <Btn variant='outline' icon={<Download size={12} />}>
-            Exportar
-          </Btn>
-          <Btn variant='teal' icon={<Plus size={12} />}>
-            Novo estudo
-          </Btn>
-        </div>
-      </div>
-
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 28px 24px' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginTop: 16,
-            fontSize: '0.78rem',
-          }}
-        >
-          <thead>
-            <tr>
-              {[
-                'ID',
-                'Título',
-                'Investigador',
-                'Dispositivos',
-                'Participantes',
-                'Progresso',
-                'Status',
-                'Ações',
-              ].map((h) => (
-                <th key={h} style={thBase}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {STUDIES.map((s) => (
-              <tr
-                key={s.id}
-                style={{
-                  borderBottom: `1px solid ${C.divider}`,
-                  transition: 'background 0.12s',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLTableRowElement).style.background =
-                    C.navyLight)
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLTableRowElement).style.background =
-                    'transparent')
-                }
-              >
-                <td
-                  style={{
-                    padding: rp,
-                    fontFamily: 'monospace',
-                    fontSize: '0.78rem',
-                    color: C.teal,
-                  }}
-                >
-                  {s.id}
-                </td>
-                <td style={{ padding: rp, fontWeight: 500, maxWidth: 260 }}>
-                  <div
-                    style={{
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      maxWidth: 220,
-                    }}
-                  >
-                    {s.title}
-                  </div>
-                </td>
-                <td style={{ padding: rp, color: C.textSec }}>{s.pi}</td>
-                <td style={{ padding: rp, textAlign: 'center' }}>
-                  {s.devices}
-                </td>
-                <td style={{ padding: rp, textAlign: 'center' }}>
-                  {s.participants}
-                </td>
-                <td style={{ padding: rp, minWidth: 100 }}>
-                  <div
-                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                  >
-                    <div
-                      style={{
-                        flex: 1,
-                        height: 4,
-                        background: C.navyMid,
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: `${s.progress}%`,
-                          background: s.progress === 100 ? C.textSec : C.teal,
-                          transition: 'width 0.5s',
-                        }}
-                      />
-                    </div>
-                    <span
-                      style={{
-                        fontSize: '0.68rem',
-                        color: C.textSec,
-                        minWidth: 28,
-                      }}
-                    >
-                      {s.progress}%
-                    </span>
-                  </div>
-                </td>
-                <td style={{ padding: rp }}>
-                  <StatusPill status={s.status} />
-                </td>
-                <td style={{ padding: rp }}>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    <IconBtn title='Ver'>
-                      <Eye size={13} />
-                    </IconBtn>
-                    <IconBtn title='Editar'>
-                      <Pencil size={13} />
-                    </IconBtn>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
-
-// ── Panel Page ─────────────────────────────────────────────────────────────────
 
 function PanelPage() {
-  const [activeNav, setActiveNav] = useState<NavId>('devices');
-  const [activeTab, setActiveTab] = useState('all');
-  const [density, setDensity] = useState<'normal' | 'compact'>(() => {
-    if (typeof window === 'undefined') return 'compact';
-    return (
-      (localStorage.getItem('pulselab_density') as 'normal' | 'compact') ??
-      'compact'
-    );
-  });
+  const [activeNav, setActiveNav] = useState<NavId>('devices')
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
-  function navigate(nav: NavId) {
-    setActiveNav(nav);
-    setActiveTab('all');
+  const page = PAGE_META[activeNav]
+
+  function handleViewDevice(device: Device) {
+    setSelectedDevice(device)
+    setDrawerOpen(true)
   }
-
-  function toggleDensity() {
-    const next = density === 'compact' ? 'normal' : 'compact';
-    setDensity(next);
-    localStorage.setItem('pulselab_density', next);
-  }
-
-  const page = PAGE_META[activeNav];
 
   return (
-    <div
-      className='pl-dark'
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '220px 1fr',
-        gridTemplateRows: '48px 1fr',
-        height: '100vh',
-        overflow: 'hidden',
-        fontSize: 13,
-        lineHeight: 1.5,
-      }}
-    >
-      {/* ── Topbar ── */}
-      <div
-        style={{
-          gridColumn: '1 / -1',
-          gridRow: 1,
-          background: C.navyLight,
-          borderBottom: `1px solid ${C.divider}`,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 20px',
-          gap: 16,
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: '"DM Serif Display", Georgia, serif',
-            fontSize: '1rem',
-            color: C.text,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginRight: 8,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <div
-            className='pl-logo-dot'
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              background: C.teal,
-              boxShadow: `0 0 8px ${C.tealGlow}`,
-              flexShrink: 0,
-            }}
-          />
-          PulseLab
+    <div className='pl-dark dark grid grid-cols-[220px_1fr] grid-rows-[48px_1fr] h-screen overflow-hidden text-[13px] leading-[1.5]'>
+      {/* Topbar */}
+      <header className='col-span-full flex items-center gap-4 px-5 bg-card border-b border-border z-10'>
+        <div className='flex items-center gap-2 mr-2 whitespace-nowrap'>
+          <span className='pl-logo-dot size-[6px] rounded-full bg-primary shrink-0' />
+          <span className='text-foreground font-medium'>PulseLab</span>
         </div>
-        <div style={{ width: 1, height: 20, background: C.divider }} />
-        <div
-          style={{
-            fontSize: '0.72rem',
-            color: C.textSec,
-            letterSpacing: '0.06em',
-          }}
-        >
-          Admin <span style={{ color: C.teal }}>/ {page.title}</span>
-        </div>
-        <div
-          style={{
-            marginLeft: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
-          <div
-            style={{
-              fontSize: '0.65rem',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: C.textSec,
-              border: `1px solid ${C.divider}`,
-              padding: '3px 8px',
-            }}
-          >
+        <div className='w-px h-5 bg-border' />
+        <span className='text-[0.72rem] text-muted-foreground tracking-[0.06em]'>
+          Admin / <span className='text-primary'>{page.title}</span>
+        </span>
+        <div className='ml-auto flex items-center gap-3'>
+          <span className='text-[0.65rem] tracking-[0.1em] uppercase text-muted-foreground border border-border px-2 py-0.5'>
             ⚠ Acesso restrito
-          </div>
-          <IconBtn title='Notificações'>
-            <Bell size={15} />
-          </IconBtn>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 7,
-              cursor: 'pointer',
-              padding: '4px 8px',
-            }}
-          >
-            <UserButtonData />
-          </div>
+          </span>
+          <Button variant='ghost' size='icon-xs'>
+            <Bell />
+          </Button>
+          <UserButtonData />
         </div>
-      </div>
+      </header>
 
-      {/* ── Sidebar ── */}
-      <div
-        style={{
-          gridColumn: 1,
-          gridRow: 2,
-          background: C.navyLight,
-          borderRight: `1px solid ${C.divider}`,
-          display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto',
-          padding: '12px 0',
-        }}
-      >
-        <div
-          style={{
-            fontSize: '0.6rem',
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: C.textSec,
-            padding: '12px 18px 6px',
-            opacity: 0.7,
-          }}
-        >
+      {/* Sidebar */}
+      <aside className='flex flex-col overflow-y-auto py-3 bg-card border-r border-border'>
+        <p className='text-[0.6rem] tracking-[0.16em] uppercase text-muted-foreground px-[18px] py-3 opacity-70'>
           Principal
-        </div>
-        {NAV.map(({ id, label, Icon, badge }) => {
-          const active = activeNav === id;
-          return (
-            <div
-              key={id}
-              onClick={() => navigate(id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '9px 18px',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: active ? 500 : 400,
-                transition: 'background 0.15s, color 0.15s',
-                borderLeft: `2px solid ${active ? C.teal : 'transparent'}`,
-                background: active ? C.tealDim : 'transparent',
-                color: active ? C.teal : C.textSec,
-                userSelect: 'none',
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.background = C.navyHover;
-                  el.style.color = C.text;
-                }
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.background = active ? C.tealDim : 'transparent';
-                el.style.color = active ? C.teal : C.textSec;
-              }}
-            >
-              <Icon
-                size={14}
-                style={{ flexShrink: 0, opacity: active ? 1 : 0.7 }}
-              />
-              {label}
-              {badge && (
-                <span
-                  style={{
-                    marginLeft: 'auto',
-                    background: C.tealDim,
-                    color: C.teal,
-                    fontSize: '0.6rem',
-                    fontWeight: 600,
-                    padding: '1px 6px',
-                    borderRadius: 9,
-                  }}
-                >
-                  {badge}
-                </span>
-              )}
-            </div>
-          );
-        })}
-
-        <div style={{ height: 1, background: C.divider, margin: '8px 0' }} />
-        <div
-          style={{
-            fontSize: '0.6rem',
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: C.textSec,
-            padding: '12px 18px 6px',
-            opacity: 0.7,
-          }}
-        >
-          Sistema
-        </div>
-
-        {[
-          { id: 'settings' as NavId, label: 'Configurações', Icon: Settings },
-        ].map(({ id, label, Icon }) => {
-          const active = activeNav === id;
-          return (
-            <div
-              key={id}
-              onClick={() => navigate(id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '9px 18px',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                transition: 'background 0.15s, color 0.15s',
-                borderLeft: `2px solid ${active ? C.teal : 'transparent'}`,
-                background: active ? C.tealDim : 'transparent',
-                color: active ? C.teal : C.textSec,
-                userSelect: 'none',
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.background = C.navyHover;
-                  el.style.color = C.text;
-                }
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.background = active ? C.tealDim : 'transparent';
-                el.style.color = active ? C.teal : C.textSec;
-              }}
-            >
-              <Icon
-                size={14}
-                style={{ flexShrink: 0, opacity: active ? 1 : 0.7 }}
-              />
-              {label}
-            </div>
-          );
-        })}
-
-        <div
-          style={{
-            marginTop: 'auto',
-            borderTop: `1px solid ${C.divider}`,
-            paddingTop: 0,
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '9px 18px',
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              transition: 'background 0.15s, color 0.15s',
-              borderLeft: '2px solid transparent',
-              color: C.textSec,
-              userSelect: 'none',
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.background = C.navyHover;
-              el.style.color = C.text;
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.background = 'transparent';
-              el.style.color = C.textSec;
-            }}
+        </p>
+        {NAV.map(({ id, label, Icon, badge }) => (
+          <button
+            key={id}
+            onClick={() => setActiveNav(id)}
+            className={cn(
+              'flex items-center gap-2.5 px-[18px] py-2.5 text-[0.8rem] cursor-pointer transition-all border-l-2 text-left w-full',
+              activeNav === id
+                ? 'border-primary bg-primary/10 text-primary font-medium'
+                : 'border-transparent text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
           >
-            <LogOut size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            <Icon size={14} className={cn('shrink-0', activeNav !== id && 'opacity-70')} />
+            {label}
+            {badge && (
+              <span className={cn('ml-auto text-[0.6rem] font-semibold px-1.5 py-0.5 rounded-full', activeNav === id ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
+                {badge}
+              </span>
+            )}
+          </button>
+        ))}
+
+        <div className='h-px bg-border my-2' />
+        <button className='flex items-center gap-2.5 px-[18px] py-2.5 text-[0.8rem] text-muted-foreground hover:bg-muted hover:text-foreground transition-all border-l-2 border-transparent w-full'>
+          <Settings size={14} className='shrink-0 opacity-70' />
+          Configurações
+        </button>
+
+        <div className='mt-auto border-t border-border'>
+          <button className='flex items-center gap-2.5 px-[18px] py-2.5 text-[0.8rem] text-muted-foreground hover:bg-muted hover:text-foreground transition-all border-l-2 border-transparent w-full'>
+            <LogOut size={14} className='shrink-0 opacity-70' />
             Sair
-          </div>
+          </button>
         </div>
-      </div>
+      </aside>
 
-      {/* ── Main ── */}
-      <div
-        style={{
-          gridColumn: 2,
-          gridRow: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          background: C.navy,
-        }}
-      >
-        {/* Page header */}
-        <div
-          style={{
-            padding: '24px 28px 0',
-            borderBottom: `1px solid ${C.divider}`,
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-              marginBottom: 18,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontFamily: '"DM Serif Display", Georgia, serif',
-                  fontSize: '1.5rem',
-                  color: C.text,
-                  lineHeight: 1,
-                }}
-              >
-                {page.title}
+      {/* Main */}
+      <main className='flex flex-col overflow-hidden bg-background'>
+        <Tabs key={activeNav} defaultValue='all' className='flex flex-col flex-1 overflow-hidden min-h-0'>
+          <div className='px-7 pt-6 border-b border-border flex-shrink-0'>
+            <div className='flex items-end justify-between mb-4'>
+              <div>
+                <h1 className='text-[1.5rem] text-foreground leading-none'>{page.title}</h1>
+                <p className='text-[0.75rem] text-muted-foreground mt-1 font-light'>{page.sub}</p>
               </div>
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: C.textSec,
-                  marginTop: 4,
-                  fontWeight: 300,
-                }}
-              >
-                {page.sub}
+              <div className='flex items-center gap-2'>
+                <Button variant='outline' size='sm'>
+                  <Download className='size-3' /> Download
+                </Button>
+                <Button size='sm'>
+                  <Plus className='size-3' /> Adicionar
+                </Button>
               </div>
             </div>
-            <button
-              onClick={toggleDensity}
-              title={`Densidade: ${density}`}
-              style={{
-                fontSize: '0.65rem',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: C.textSec,
-                border: `1px solid ${C.divider}`,
-                background: 'transparent',
-                padding: '3px 8px',
-                cursor: 'pointer',
-              }}
-            >
-              {density === 'compact' ? 'Compacto' : 'Normal'}
-            </button>
+            <TabsList variant='line' className='h-auto gap-0 p-0 w-fit'>
+              {page.tabs.map(([id, label]) => (
+                <TabsTrigger key={id} value={id} className='rounded-none px-5 py-2.5 text-[0.78rem]'>
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-          <div style={{ display: 'flex' }}>
-            {page.tabs.map((t) => (
-              <div
-                key={t.id}
-                onClick={() => setActiveTab(t.id)}
-                style={{
-                  padding: '10px 20px',
-                  fontSize: '0.78rem',
-                  fontWeight: activeTab === t.id ? 500 : 400,
-                  color: activeTab === t.id ? C.teal : C.textSec,
-                  cursor: 'pointer',
-                  borderBottom: `2px solid ${activeTab === t.id ? C.teal : 'transparent'}`,
-                  transition: 'color 0.15s, border-color 0.15s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 7,
-                  userSelect: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {t.label}
-                {TAB_COUNTS[t.id] && (
-                  <span
-                    style={{
-                      fontSize: '0.62rem',
-                      padding: '1px 5px',
-                      borderRadius: 8,
-                      background: activeTab === t.id ? C.tealDim : C.navyMid,
-                      color: activeTab === t.id ? C.teal : C.textSec,
-                    }}
-                  >
-                    {TAB_COUNTS[t.id]}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Page content */}
-        {activeNav === 'devices' && activeTab === 'all' ? (
-          <DevicesTab density={density} />
-        ) : activeNav === 'participants' && activeTab === 'all' ? (
-          <ParticipantsTab density={density} />
-        ) : activeNav === 'studies' && activeTab === 'all' ? (
-          <StudiesTab density={density} />
-        ) : (
-          <div
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              color: C.textSec,
-              fontSize: '0.82rem',
-            }}
-          >
-            <BarChart3 size={32} style={{ opacity: 0.3 }} />
-            <span>Em desenvolvimento</span>
-          </div>
-        )}
-      </div>
+          {activeNav === 'analytics' ? (
+            <div className='flex-1 overflow-auto p-6'>
+              <Card className='bg-card border-border'>
+                <CardContent className='p-6 text-muted-foreground text-[0.82rem]'>
+                  Analytics — Em breve
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <>
+              <TabsContent value='all' className='flex-1 overflow-auto m-0'>
+                {activeNav === 'devices' && <DevicesTab onViewDevice={handleViewDevice} />}
+                {activeNav === 'participants' && <ParticipantsTab />}
+                {activeNav === 'studies' && <StudiesTab />}
+              </TabsContent>
+              {page.tabs.slice(1).map(([id]) => (
+                <TabsContent key={id} value={id} className='flex-1 flex items-center justify-center text-muted-foreground text-[0.82rem] m-0'>
+                  Em desenvolvimento
+                </TabsContent>
+              ))}
+            </>
+          )}
+        </Tabs>
+      </main>
+
+      <DeviceDrawer
+        device={selectedDevice}
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setSelectedDevice(null) }}
+      />
     </div>
-  );
+  )
 }
