@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useUser } from '@clerk/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UserButtonData } from '@/components/user/UserButtonData'
+import { DEVICES } from '@api/data/mockData'
+import { DeviceCard } from '@/components/user-panel/DeviceCard'
 
 export const Route = createFileRoute('/_authenticated/user/')({
   component: UserPanel,
@@ -23,7 +25,7 @@ function UserPanel() {
             <CardTitle className="text-sea-ink">Meus Dispositivos</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">Em breve...</p>
+            <DeviceCard device={DEVICES[0]} />
           </CardContent>
         </Card>
         <Card className="col-span-2">
