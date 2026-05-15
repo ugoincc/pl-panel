@@ -8,6 +8,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools';
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
 import { ClerkProvider } from '@clerk/react';
 import { ptBR } from '@clerk/localizations';
+import { AuthProvider } from '../contexts/authContext';
 
 import appCss from '../styles.css?url';
 
@@ -73,7 +74,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           signInUrl='/auth/sign-in'
           localization={ptBR}
         >
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ClerkProvider>
         <TanStackDevtools
           config={{

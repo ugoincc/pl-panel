@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
-import { Show, SignInButton, UserButton } from '@clerk/react'
+import { useEffect, useState } from 'react';
+import { Show, SignInButton, UserButton, useUser } from '@clerk/react';
+import { UserButtonData } from '../user/UserButtonData';
 
 export default function Nav() {
-  const [scrolled, setScrolled] = useState(false)
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', handler)
-    return () => window.removeEventListener('scroll', handler)
-  }, [])
+    const handler = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', handler);
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
 
   return (
     <nav
@@ -40,7 +41,7 @@ export default function Nav() {
         }}
       >
         <div
-          className="pl-logo-dot"
+          className='pl-logo-dot'
           style={{
             width: 8,
             height: 8,
@@ -53,7 +54,7 @@ export default function Nav() {
         PulseLab
       </div>
 
-      <Show when="signed-out">
+      <Show when='signed-out'>
         <SignInButton mode='modal'>
           <button
             style={{
@@ -70,22 +71,19 @@ export default function Nav() {
               transition: 'background 0.2s, color 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#00BFA5'
-              e.currentTarget.style.color = '#0A1628'
+              e.currentTarget.style.background = '#00BFA5';
+              e.currentTarget.style.color = '#0A1628';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.color = '#00BFA5'
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#00BFA5';
             }}
           >
             Acessar Plataforma
           </button>
         </SignInButton>
       </Show>
-
-      <Show when="signed-in">
-        <UserButton />
-      </Show>
+      <UserButtonData />
     </nav>
-  )
+  );
 }
