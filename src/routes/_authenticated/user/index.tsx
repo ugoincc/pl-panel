@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UserButtonData } from '@/components/user/UserButtonData'
 import { DEVICES } from '@api/data/mockData'
 import { DeviceCard } from '@/components/user-panel/DeviceCard'
+import { ExportPanel } from '@/components/user-panel/ExportPanel'
 
 export const Route = createFileRoute('/_authenticated/user/')({
   component: UserPanel,
@@ -33,7 +34,7 @@ function UserPanel() {
             <CardTitle className="text-sea-ink">Exportar Dados</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">Em breve...</p>
+            <ExportPanel />
           </CardContent>
         </Card>
       </main>
