@@ -6,6 +6,7 @@
     "module": "ESNext",
     "paths": {
       "@/*": ["./src/*"],
+      "#/*": ["./src/*"],
       "@contexts": ["./src/contexts/*"],
       "@api/*": ["./src/api/*"],
       "@types": ["./src/types/"]
