@@ -19,6 +19,9 @@ import {
 import { UserButtonData } from '@/components/user/UserButtonData';
 import type { Device } from '@types';
 import { DEVICES, PARTICIPANTS, STUDIES } from '@api/data/mockData';
+import { StatusPill } from '@/components/panel/StatusPill';
+import { BatteryCell } from '@/components/panel/BatteryCell';
+import { Sparkline } from '@/components/panel/Sparkline';
 export const Route = createFileRoute('/_authenticated/panel/')({
   component: PanelPage,
 });
@@ -199,96 +202,6 @@ function IconBtn({
 
 // ── Cell components ────────────────────────────────────────────────────────────
 
-function StatusPill({ status }: { status: string }) {
-  const cfg: Record<
-    string,
-    { bg: string; color: string; label: string; dotClass?: string }
-  > = {
-    online: {
-      bg: 'rgba(0,191,165,0.10)',
-      color: C.teal,
-      label: 'Online',
-      dotClass: 'admin-dot-online',
-    },
-    offline: { bg: 'rgba(224,92,92,0.10)', color: C.red, label: 'Offline' },
-    syncing: {
-      bg: 'rgba(212,160,23,0.10)',
-      color: C.amber,
-      label: 'Sincronizando',
-      dotClass: 'admin-dot-syncing',
-    },
-    ativo: {
-      bg: 'rgba(0,191,165,0.10)',
-      color: C.teal,
-      label: 'Ativo',
-      dotClass: 'admin-dot-online',
-    },
-    pausado: { bg: 'rgba(212,160,23,0.10)', color: C.amber, label: 'Pausado' },
-    concluído: { bg: 'rgba(224,92,92,0.10)', color: C.red, label: 'Concluído' },
-  };
-  const c = cfg[status] ?? { bg: C.navyMid, color: C.textSec, label: status };
-  return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 5,
-        padding: '3px 8px',
-        fontSize: '0.66rem',
-        fontWeight: 500,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-        background: c.bg,
-        color: c.color,
-      }}
-    >
-      <span
-        className={c.dotClass}
-        style={{
-          width: 5,
-          height: 5,
-          borderRadius: '50%',
-          background: c.color,
-          flexShrink: 0,
-          boxShadow: c.dotClass ? `0 0 4px ${c.color}` : 'none',
-        }}
-      />
-      {c.label}
-    </span>
-  );
-}
-
-function BatteryCell({ pct }: { pct: number }) {
-  const col = pct > 50 ? C.teal : pct > 20 ? C.amber : C.red;
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-      <div
-        style={{
-          width: 36,
-          height: 9,
-          border: `1px solid ${C.divider}`,
-          borderRadius: 2,
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: `${pct}%`,
-            background: col,
-            transition: 'width 0.3s',
-          }}
-        />
-      </div>
-      <span style={{ fontSize: '0.72rem', color: col }}>{pct}%</span>
-    </div>
-  );
-}
-
 function HRVSpark({ vals }: { vals: number[] | null }) {
   if (!vals)
     return <span style={{ color: C.textSec, fontSize: '0.7rem' }}>—</span>;
@@ -310,50 +223,6 @@ function HRVSpark({ vals }: { vals: number[] | null }) {
         />
       ))}
     </div>
-  );
-}
-
-function Sparkline({
-  vals,
-  color = C.teal,
-  h = 48,
-}: {
-  vals: number[];
-  color?: string;
-  h?: number;
-}) {
-  const max = Math.max(...vals),
-    min = Math.min(...vals),
-    range = max - min || 1;
-  const W = 330,
-    pad = 8;
-  const pts = vals.map((v, i) => {
-    const x = pad + (i / (vals.length - 1)) * (W - pad * 2);
-    const y = h - pad - ((v - min) / range) * (h - pad * 2);
-    return [x, y] as [number, number];
-  });
-  const polyPts = pts.map(([x, y]) => `${x},${y}`).join(' ');
-  const area = `M ${pad} ${h} ${pts.map(([x, y]) => `L ${x} ${y}`).join(' ')} L ${W - pad} ${h} Z`;
-  const gradId = `sg${color.replace(/[^a-z0-9]/gi, '')}`;
-  const [lx, ly] = pts[pts.length - 1];
-  return (
-    <svg viewBox={`0 0 ${W} ${h}`} style={{ width: '100%', height: h }}>
-      <defs>
-        <linearGradient id={gradId} x1='0' y1='0' x2='0' y2='1'>
-          <stop offset='0%' stopColor={color} stopOpacity='0.15' />
-          <stop offset='100%' stopColor={color} stopOpacity='0' />
-        </linearGradient>
-      </defs>
-      <path d={area} fill={`url(#${gradId})`} />
-      <polyline
-        points={polyPts}
-        fill='none'
-        stroke={color}
-        strokeWidth='1.5'
-        strokeLinejoin='round'
-      />
-      <circle cx={lx} cy={ly} r='3' fill={color} />
-    </svg>
   );
 }
 
