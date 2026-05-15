@@ -3,14 +3,19 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
   type RowSelectionState,
+  type SortingState,
+  type FilterFn,
 } from '@tanstack/react-table'
-import { Eye, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, Eye, RefreshCw, Trash2 } from 'lucide-react'
 import type { Device } from '@types'
 import { DEVICES } from '@api/data/mockData'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -25,12 +30,29 @@ import { Sparkline } from '@/components/panel/Sparkline'
 
 const columnHelper = createColumnHelper<Device>()
 
+const deviceGlobalFilter: FilterFn<Device> = (row, _columnId, filterValue: string) => {
+  const q = filterValue.toLowerCase()
+  return (
+    row.original.id.toLowerCase().includes(q) ||
+    row.original.participant.toLowerCase().includes(q) ||
+    row.original.study.toLowerCase().includes(q)
+  )
+}
+
+function SortIcon({ sorted }: { sorted: false | 'asc' | 'desc' }) {
+  if (sorted === 'asc') return <ArrowUp className='ml-1 size-3' />
+  if (sorted === 'desc') return <ArrowDown className='ml-1 size-3' />
+  return <ArrowUpDown className='ml-1 size-3 opacity-40' />
+}
+
 export function DevicesTab({
   onViewDevice,
 }: {
   onViewDevice: (device: Device) => void
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
 
   const columns = [
     columnHelper.display({
@@ -54,7 +76,16 @@ export function DevicesTab({
       ),
     }),
     columnHelper.accessor('id', {
-      header: 'Dispositivo',
+      header: ({ column }) => (
+        <button
+          className='flex items-center text-muted-foreground hover:text-foreground'
+          onClick={() => column.toggleSorting()}
+        >
+          Dispositivo
+          <SortIcon sorted={column.getIsSorted()} />
+        </button>
+      ),
+      enableSorting: true,
       cell: ({ row }) => (
         <div>
           <div className='font-medium text-foreground text-[0.78rem]'>
@@ -67,16 +98,35 @@ export function DevicesTab({
       ),
     }),
     columnHelper.accessor('status', {
-      header: 'Status',
+      header: ({ column }) => (
+        <button
+          className='flex items-center text-muted-foreground hover:text-foreground'
+          onClick={() => column.toggleSorting()}
+        >
+          Status
+          <SortIcon sorted={column.getIsSorted()} />
+        </button>
+      ),
+      enableSorting: true,
       cell: ({ getValue }) => <StatusPill status={getValue()} />,
     }),
     columnHelper.accessor('battery', {
-      header: 'Bateria',
+      header: ({ column }) => (
+        <button
+          className='flex items-center text-muted-foreground hover:text-foreground'
+          onClick={() => column.toggleSorting()}
+        >
+          Bateria
+          <SortIcon sorted={column.getIsSorted()} />
+        </button>
+      ),
+      enableSorting: true,
       cell: ({ getValue }) => <BatteryCell pct={getValue()} />,
     }),
     columnHelper.accessor('hrv', {
       id: 'hrv',
       header: 'HRV',
+      enableSorting: false,
       cell: ({ getValue }) => {
         const hrv = getValue()
         if (!hrv)
@@ -89,22 +139,32 @@ export function DevicesTab({
     }),
     columnHelper.accessor('participant', {
       header: 'Participante',
+      enableSorting: false,
       cell: ({ getValue }) => (
         <span className='text-[0.75rem] text-foreground'>{getValue()}</span>
       ),
     }),
     columnHelper.accessor('study', {
       header: 'Estudo',
+      enableSorting: false,
       cell: ({ getValue }) => (
         <span className='text-[0.75rem] text-muted-foreground'>{getValue()}</span>
       ),
     }),
     columnHelper.accessor('lastSync', {
-      header: 'Último Sync',
+      header: ({ column }) => (
+        <button
+          className='flex items-center text-muted-foreground hover:text-foreground'
+          onClick={() => column.toggleSorting()}
+        >
+          Último Sync
+          <SortIcon sorted={column.getIsSorted()} />
+        </button>
+      ),
+      enableSorting: true,
       cell: ({ getValue }) => {
         const val = getValue()
-        if (!val)
-          return <span className='text-muted-foreground'>—</span>
+        if (!val) return <span className='text-muted-foreground'>—</span>
         const [date, time] = val.split(' ')
         return (
           <div>
@@ -141,13 +201,24 @@ export function DevicesTab({
     data: DEVICES,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
-    state: { rowSelection },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: deviceGlobalFilter,
+    state: { rowSelection, sorting, globalFilter },
   })
 
   return (
     <div className='flex flex-col gap-4 p-6'>
+      <Input
+        placeholder='Buscar dispositivo...'
+        value={globalFilter}
+        onChange={(e) => setGlobalFilter(e.target.value)}
+        className='max-w-xs bg-card border-border text-foreground placeholder:text-muted-foreground'
+      />
       <div className='rounded-md border border-border'>
         <Table>
           <TableHeader>
@@ -157,10 +228,7 @@ export function DevicesTab({
                 className='border-border hover:bg-muted/50'
               >
                 {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className='text-muted-foreground text-[0.63rem] uppercase tracking-[0.1em]'
-                  >
+                  <TableHead key={header.id} className='text-[0.63rem] uppercase tracking-[0.1em]'>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
