@@ -11,8 +11,8 @@ import {
   type SortingState,
 } from '@tanstack/react-table'
 import { ArrowDown, ArrowUp, ArrowUpDown, Eye, Pencil, Trash2 } from 'lucide-react'
-import type { Study } from '@types'
-import { STUDIES } from '@api/data/mockData'
+import type { User } from '@types'
+import { USERS } from '@api/data/mockData'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -24,16 +24,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { StatusPill } from '@/components/panel/StatusPill'
 
-const columnHelper = createColumnHelper<Study>()
+const columnHelper = createColumnHelper<User>()
 
-const studyGlobalFilter: FilterFn<Study> = (row, _columnId, filterValue: string) => {
+const userGlobalFilter: FilterFn<User> = (row, _columnId, filterValue: string) => {
   const q = filterValue.toLowerCase()
+  const fullName = `${row.original.firstName} ${row.original.lastName}`.toLowerCase()
   return (
     row.original.id.toLowerCase().includes(q) ||
-    row.original.title.toLowerCase().includes(q) ||
-    row.original.pi.toLowerCase().includes(q)
+    row.original.email.toLowerCase().includes(q) ||
+    fullName.includes(q)
   )
 }
 
@@ -43,7 +43,7 @@ function SortIcon({ sorted }: { sorted: false | 'asc' | 'desc' }) {
   return <ArrowUpDown className='ml-1 size-3 opacity-40' />
 }
 
-export function StudiesTab() {
+export function UsersTab() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -73,87 +73,64 @@ export function StudiesTab() {
       header: 'ID',
       enableSorting: false,
       cell: ({ getValue }) => (
-        <span className='font-mono text-primary text-[0.78rem]'>{getValue()}</span>
-      ),
-    }),
-    columnHelper.accessor('title', {
-      header: ({ column }) => (
-        <button
-          className='flex items-center text-muted-foreground hover:text-foreground'
-          onClick={() => column.toggleSorting()}
-        >
-          Título
-          <SortIcon sorted={column.getIsSorted()} />
-        </button>
-      ),
-      enableSorting: true,
-      cell: ({ getValue }) => (
-        <span className='font-medium text-[0.78rem] max-w-[220px] truncate block'>
+        <span className='text-primary font-medium font-mono text-[0.8rem]'>
           {getValue()}
         </span>
       ),
     }),
-    columnHelper.accessor('pi', {
+    columnHelper.display({
+      id: 'name',
       header: ({ column }) => (
         <button
           className='flex items-center text-muted-foreground hover:text-foreground'
           onClick={() => column.toggleSorting()}
         >
-          Investigador
+          Nome
           <SortIcon sorted={column.getIsSorted()} />
         </button>
       ),
       enableSorting: true,
+      cell: ({ row }) => (
+        <span className='font-medium text-[0.78rem]'>
+          {row.original.firstName} {row.original.lastName}
+        </span>
+      ),
+    }),
+    columnHelper.accessor('email', {
+      header: 'Email',
+      enableSorting: false,
       cell: ({ getValue }) => (
         <span className='text-muted-foreground text-[0.78rem]'>{getValue()}</span>
       ),
     }),
-    columnHelper.accessor('devices', {
-      header: 'Dispositivos',
-      enableSorting: false,
-      cell: ({ getValue }) => (
-        <span className='text-center block text-[0.78rem]'>{getValue()}</span>
-      ),
-    }),
-    columnHelper.accessor('participants', {
-      header: 'Participantes',
-      enableSorting: false,
-      cell: ({ getValue }) => (
-        <span className='text-center block text-[0.78rem]'>{getValue()}</span>
-      ),
-    }),
-    columnHelper.accessor('progress', {
-      header: 'Progresso',
+    columnHelper.accessor('deviceId', {
+      header: 'Dispositivo',
       enableSorting: false,
       cell: ({ getValue }) => {
-        const pct = getValue()
-        return (
-          <div className='flex items-center gap-2'>
-            <div className='bg-muted rounded-full h-2 w-24 overflow-hidden'>
-              <div
-                className='bg-primary rounded-full h-2'
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <span className='text-[0.68rem] text-muted-foreground min-w-[28px]'>
-              {pct}%
-            </span>
-          </div>
+        const v = getValue()
+        return v ? (
+          <span className='text-[0.72rem] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono'>
+            {v}
+          </span>
+        ) : (
+          <span className='text-muted-foreground text-[0.72rem]'>—</span>
         )
       },
     }),
-    columnHelper.accessor('status', {
+    columnHelper.accessor('createdAt', {
       header: ({ column }) => (
         <button
           className='flex items-center text-muted-foreground hover:text-foreground'
           onClick={() => column.toggleSorting()}
         >
-          Status
+          Criado em
           <SortIcon sorted={column.getIsSorted()} />
         </button>
       ),
       enableSorting: true,
-      cell: ({ getValue }) => <StatusPill status={getValue()} />,
+      cell: ({ getValue }) => (
+        <span className='text-muted-foreground text-[0.75rem]'>{getValue()}</span>
+      ),
     }),
     columnHelper.display({
       id: 'actions',
@@ -175,7 +152,7 @@ export function StudiesTab() {
   ]
 
   const table = useReactTable({
-    data: STUDIES,
+    data: USERS,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -184,14 +161,14 @@ export function StudiesTab() {
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: studyGlobalFilter,
+    globalFilterFn: userGlobalFilter,
     state: { rowSelection, sorting, globalFilter },
   })
 
   return (
     <div className='flex flex-col gap-4 p-6'>
       <Input
-        placeholder='Buscar estudo...'
+        placeholder='Buscar utilizador...'
         value={globalFilter}
         onChange={(e) => setGlobalFilter(e.target.value)}
         className='max-w-xs bg-card border-border text-foreground placeholder:text-muted-foreground'
@@ -200,21 +177,12 @@ export function StudiesTab() {
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className='border-border hover:bg-muted/50'
-              >
+              <TableRow key={headerGroup.id} className='border-border hover:bg-muted/50'>
                 {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className='text-[0.63rem] uppercase tracking-[0.1em]'
-                  >
+                  <TableHead key={header.id} className='text-[0.63rem] uppercase tracking-[0.1em]'>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>

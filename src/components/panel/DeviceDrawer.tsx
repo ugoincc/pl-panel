@@ -75,8 +75,7 @@ export function DeviceDrawer({
               <div className='grid grid-cols-2 gap-2.5'>
                 {(
                   [
-                    ['Participante', device.participant],
-                    ['Estudo', device.study],
+                    ['Utilizador', device.userName ?? '—'],
                     ['Último sync', device.lastSync?.split(' ')[1] ?? '—'],
                     ['Data', device.lastSync?.split(' ')[0] ?? '—'],
                   ] as [string, string][]

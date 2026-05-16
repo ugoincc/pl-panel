@@ -34,8 +34,7 @@ const deviceGlobalFilter: FilterFn<Device> = (row, _columnId, filterValue: strin
   const q = filterValue.toLowerCase()
   return (
     row.original.id.toLowerCase().includes(q) ||
-    row.original.participant.toLowerCase().includes(q) ||
-    row.original.study.toLowerCase().includes(q)
+    (row.original.userName?.toLowerCase().includes(q) ?? false)
   )
 }
 
@@ -137,18 +136,11 @@ export function DevicesTab({
         return <Sparkline vals={vals} h={24} />
       },
     }),
-    columnHelper.accessor('participant', {
-      header: 'Participante',
-      enableSorting: false,
+    columnHelper.accessor('userName', {
+      header: 'Utilizador',
+      enableSorting: true,
       cell: ({ getValue }) => (
-        <span className='text-[0.75rem] text-foreground'>{getValue()}</span>
-      ),
-    }),
-    columnHelper.accessor('study', {
-      header: 'Estudo',
-      enableSorting: false,
-      cell: ({ getValue }) => (
-        <span className='text-[0.75rem] text-muted-foreground'>{getValue()}</span>
+        <span className='text-[0.75rem] text-foreground'>{getValue() ?? '—'}</span>
       ),
     }),
     columnHelper.accessor('lastSync', {

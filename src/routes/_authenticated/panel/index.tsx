@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
-  BarChart3,
   Bell,
-  BookOpen,
   Download,
   LogOut,
   Plus,
@@ -15,24 +13,20 @@ import { cn } from '@/lib/utils'
 import { UserButtonData } from '@/components/user/UserButtonData'
 import type { Device } from '@types'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DeviceDrawer } from '@/components/panel/DeviceDrawer'
 import { DevicesTab } from '@/components/panel/DevicesTab'
-import { ParticipantsTab } from '@/components/panel/ParticipantsTab'
-import { StudiesTab } from '@/components/panel/StudiesTab'
+import { UsersTab } from '@/components/panel/UsersTab'
 
 export const Route = createFileRoute('/_authenticated/panel/')({
   component: PanelPage,
 })
 
-type NavId = 'devices' | 'participants' | 'studies' | 'analytics'
+type NavId = 'devices' | 'users'
 
 const NAV = [
   { id: 'devices' as NavId, label: 'Dispositivos', Icon: Watch, badge: '10' },
-  { id: 'participants' as NavId, label: 'Participantes', Icon: Users, badge: '10' },
-  { id: 'studies' as NavId, label: 'Estudos', Icon: BookOpen, badge: '4' },
-  { id: 'analytics' as NavId, label: 'Analytics', Icon: BarChart3, badge: null },
+  { id: 'users' as NavId, label: 'Utilizadores', Icon: Users, badge: '10' },
 ]
 
 const PAGE_META: Record<
@@ -41,23 +35,13 @@ const PAGE_META: Record<
 > = {
   devices: {
     title: 'Dispositivos',
-    sub: 'Gerenciar smartwatches conectados e monitorar métricas ao vivo',
+    sub: 'Gerir smartwatches conectados e monitorar métricas ao vivo',
     tabs: [['all', 'Dispositivos'], ['alerts', 'Alertas'], ['log', 'Log de eventos']],
   },
-  participants: {
-    title: 'Participantes',
-    sub: 'Cadastro e gerenciamento de participantes dos estudos',
-    tabs: [['all', 'Participantes'], ['consent', 'TCLEs']],
-  },
-  studies: {
-    title: 'Estudos',
-    sub: 'Protocolos de pesquisa ativos e histórico',
-    tabs: [['all', 'Estudos'], ['protocols', 'Protocolos']],
-  },
-  analytics: {
-    title: 'Analytics',
-    sub: 'Visualizações e relatórios consolidados',
-    tabs: [['all', 'Visão geral']],
+  users: {
+    title: 'Utilizadores',
+    sub: 'Gerir utilizadores e os seus dispositivos associados',
+    tabs: [['all', 'Utilizadores']],
   },
 }
 
@@ -163,28 +147,15 @@ function PanelPage() {
             </TabsList>
           </div>
 
-          {activeNav === 'analytics' ? (
-            <div className='flex-1 overflow-auto p-6'>
-              <Card className='bg-card border-border'>
-                <CardContent className='p-6 text-muted-foreground text-[0.82rem]'>
-                  Analytics — Em breve
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            <>
-              <TabsContent value='all' className='flex-1 overflow-auto m-0'>
-                {activeNav === 'devices' && <DevicesTab onViewDevice={handleViewDevice} />}
-                {activeNav === 'participants' && <ParticipantsTab />}
-                {activeNav === 'studies' && <StudiesTab />}
-              </TabsContent>
-              {page.tabs.slice(1).map(([id]) => (
-                <TabsContent key={id} value={id} className='flex-1 flex items-center justify-center text-muted-foreground text-[0.82rem] m-0'>
-                  Em desenvolvimento
-                </TabsContent>
-              ))}
-            </>
-          )}
+          <TabsContent value='all' className='flex-1 overflow-auto m-0'>
+            {activeNav === 'devices' && <DevicesTab onViewDevice={handleViewDevice} />}
+            {activeNav === 'users' && <UsersTab />}
+          </TabsContent>
+          {page.tabs.slice(1).map(([id]) => (
+            <TabsContent key={id} value={id} className='flex-1 flex items-center justify-center text-muted-foreground text-[0.82rem] m-0'>
+              Em desenvolvimento
+            </TabsContent>
+          ))}
         </Tabs>
       </main>
 
